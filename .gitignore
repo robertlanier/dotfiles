@@ -3,3 +3,6 @@
 **/*.pyc
 **/node_modules/
 **/logs/
+.DS_Store
+# zsh runtime state — do not version
+zsh/.config/zsh/sessions/

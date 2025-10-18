@@ -1,0 +1,142 @@
+# ╭─────────────────────────────────────────────╮
+# │  ZSH CHEAT SHEETS        │
+# │  zoxide • fzf • fzf-tab                     │
+# │  Keep them here for muscle memory refresh.  │
+# ╰─────────────────────────────────────────────╯
+
+# ──────────────────────────────────────────────
+# ZOXIDE CHEAT SHEET — Smart cd replacement
+# https://github.com/ajeetdsouza/zoxide
+# ──────────────────────────────────────────────
+# Basic usage:
+#   z <keyword>    → jump to best-match directory
+#   zi <keyword>   → interactive jump (fzf-powered)
+#   z              → jump to most-used dir overall
+#   z -            → jump back (previous dir)
+#   zq <keyword>   → preview which path zoxide would jump to
+#
+# Explore & manage:
+#   zoxide query --list        → show all tracked dirs
+#   zoxide remove <path>       → forget a specific dir
+#   zoxide remove --all        → forget everything (reset)
+#
+# Optional quality-of-life aliases:
+alias j='z'        # jump quickly
+alias ji='zi'      # interactive jump
+alias jls='zoxide query --list | fzf'  # browse all known dirs
+#
+# Pro tip:
+#   zoxide learns automatically every time you cd somewhere.
+#   The more you use it, the smarter it gets.
+#   Perfect for ADHD workflows: fewer keystrokes, less context switching.
+# ──────────────────────────────────────────────
+
+# ──────────────────────────────────────────────
+# FZF CHEAT SHEET — interactive fuzzy finder
+# https://github.com/junegunn/fzf
+# Requires: [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# Run once:  $(brew --prefix)/opt/fzf/install
+# ──────────────────────────────────────────────
+# Default keybindings (added by installer):
+#   Ctrl+R  → fuzzy search shell history
+#   Ctrl+T  → fuzzy search files, paste path into cmdline
+#   Alt+C   → fuzzy cd into a directory
+#
+# Core usage patterns:
+#   fzf                       → filter a list you pipe into it
+#   some_command | fzf       → pick one item from that list
+#   var=$(list | fzf)        → capture selection for scripts
+#
+# Practical examples:
+#   vim $(fzf)               → open a file picked interactively
+#   git checkout $(git branch | fzf)        → switch branch
+#   git checkout $(git tag | fzf)           → checkout tag
+#   ps aux | fzf              → find a process (then use PID)
+#   history | fzf             → pick an old command
+#   lsof -i | fzf             → search open ports/conns
+#
+# With preview (needs `bat` or `cat`, `git` optional):
+#   fzf --preview 'bat --style=plain --line-range :200 {}'
+#   git ls-files | fzf --preview 'git diff --color=always -- {}'
+#
+# Handy aliases (uncomment what you like):
+alias fh='history | fzf'                               # pick from history
+alias ff='fzf'                                         # generic picker
+alias fvim="vim \$(fzf)"                               # open file in vim
+alias fcd='cd "$(fd -t d . 2>/dev/null | fzf)"'        # jump to dir (needs `fd`)
+alias fgc='git checkout "$(git branch --all | sed s#remotes/[^/]*/## | sort -u | fzf)"'
+alias fgt='git checkout "$(git tag | fzf)"'
+#
+# Optional: make fzf search faster and calmer
+if command -v fd >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND='fd --hidden --follow --exclude .git'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+fi
+#
+export FZF_DEFAULT_OPTS='
+  --height=40%
+  --layout=reverse
+  --border
+  --info=inline
+  --cycle
+  --marker="✓ "
+  --prompt="❯ "
+'
+if command -v bat >/dev/null 2>&1; then
+  export FZF_PREVIEW_COMMAND='
+    if [ -d "{}" ]; then
+      command ls -la -- "{}"
+    else
+      bat --style=plain --color=always --line-range :200 "{}"
+    fi
+  '
+else
+  export FZF_PREVIEW_COMMAND='
+    if [ -d "{}" ]; then
+      command ls -la -- "{}"
+    else
+      head -n 200 "{}"
+    fi
+  '
+fi
+# ──────────────────────────────────────────────
+
+# ──────────────────────────────────────────────
+# 🔤 FZF-TAB CHEAT SHEET — fuzzy, previewable tab completion
+# https://github.com/Aloxaf/fzf-tab
+# Manual install:
+#   mkdir -p ~/.config/zsh/plugins
+#   git clone https://github.com/Aloxaf/fzf-tab.git ~/.config/zsh/plugins/fzf-tab
+#
+# Load after compinit:
+#   autoload -Uz compinit; compinit
+#   source ~/.config/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+# ──────────────────────────────────────────────
+# What it does:
+#   Replaces the default tab completion menu with a fuzzy, fzf-powered interface.
+#   Lets you type partial input, see a popup list, and preview results instantly.
+#
+# How to use:
+#   • Press <TAB> → fuzzy completion popup
+#   • Type a few letters → filters matches
+#   • Move with ↑/↓ → navigate
+#   • Enter → accept selection
+#
+# Examples:
+#   cd ~/D<TAB>             → choose Desktop, Documents, Downloads, etc.
+#   git checkout <TAB>      → fuzzy-pick a branch or tag
+#   kubectl get <TAB>       → fuzzy resource completion
+#   aws <TAB>               → fuzzy subcommand completion
+#
+# Optional previews (requires bat or exa/eza):
+#   zstyle ':fzf-tab:complete:*:*' fzf-preview 'bat --style=plain --color=always --line-range :200 {}'
+#   zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always -la {}'
+#
+export FZF_TAB_OPTS='--height=40% --layout=reverse --border --cycle --info=inline'
+#
+# Tips:
+#   • No extra keybindings — just press TAB as usual.
+#   • Works perfectly with fzf, zoxide, autosuggestions, and fast-syntax-highlighting.
+#   • Helps ADHD workflows by reducing cognitive friction — one consistent fuzzy interface everywhere.
+# ──────────────────────────────────────────────

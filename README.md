@@ -7,6 +7,7 @@ Everything is modular and lives inside `~/.config`, with small dispatcher files 
 
 ## 📁 Directory Structure
 
+```
 dotfiles/
 ├─ shell/ # Top-level shell configs
 │ ├─ .zshrc → ~/.zshrc
@@ -27,6 +28,7 @@ dotfiles/
 ├─ starship/.config/starship/ → ~/.config/starship
 ├─ vim/.config/vim/ → ~/.config/vim
 └─ .stow-local-ignore / .gitignore
+```
 
 ---
 

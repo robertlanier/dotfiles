@@ -1,12 +1,13 @@
 # 🧩 Dotfiles
 
-Personal configuration files managed with **GNU Stow** for macOS (Apple Silicon) and Linux (Ubuntu, RHEL, Fedora, etc.).  
+Personal configuration files managed with **GNU Stow** for macOS (Apple Silicon), Linux (Ubuntu, RHEL, Fedora), and Windows via WSL.  
 Everything is modular and lives inside `~/.config`, with small dispatcher files in `~` to make cross-platform setup effortless.
 
 **✨ Features:**
-- 🔄 **Automatic OS detection** - configs adapt to macOS, Ubuntu, RHEL, Fedora automatically
+- 🔄 **Automatic OS detection** - configs adapt to macOS, Ubuntu, RHEL, Fedora, WSL automatically
 - 📦 **Modular packages** - install only what you need with stow
 - 🏗️ **Base + overlay architecture** - shared Linux configs with distribution-specific overlays
+- 🪟 **WSL support** - Windows integration via clipboard and browser
 - 🚀 **Dual-remote push** - sync to both GitLab and GitHub with different emails
 
 ---
@@ -25,7 +26,8 @@ dotfiles/
 │        ├─ linux.sh               # Base Linux (all distributions)
 │        ├─ ubuntu.sh              # Ubuntu/Debian overlay
 │        ├─ fedora.sh              # Fedora overlay  
-│        └─ rhel.sh                # RHEL/CentOS overlay
+│        ├─ rhel.sh                # RHEL/CentOS overlay
+│        └─ wsl.sh                 # WSL overlay (Windows integration)
 │
 ├─ zsh/                            # Zsh-specific configuration
 │  └─ .config/zsh/
@@ -71,6 +73,8 @@ sudo pacman -S stow
 
 ## 🚀 Quick Start
 
+### macOS / Linux / WSL
+
 ```bash
 # Clone the repository
 git clone https://github.com/robertlanier/dotfiles.git
@@ -86,7 +90,18 @@ stow zsh git vim starship fzf
 exec $SHELL
 ```
 
+### Windows (via WSL)
+
+```powershell
+# In PowerShell - Install WSL if not already installed
+wsl --install
+
+# Then follow the Linux/WSL instructions above inside WSL
+```
+
 **That's it!** The shell configuration will automatically detect your OS and load the appropriate configurations.
+
+> **Note:** Native Windows (PowerShell/CMD) is not supported. Use WSL for Windows environments.
 
 ---
 
@@ -99,16 +114,22 @@ The shell configuration automatically detects your operating system and loads th
 - Includes: Homebrew setup, macOS-specific aliases, BSD command variants
 
 ### **Linux Distributions**  
-- Loads: `common.sh` → `linux.sh` → `{distribution}.sh`
-- **Ubuntu/Debian**: Adds `apt` aliases, snap paths, WSL detection
+
+- Loads: `common.sh` → `linux.sh` → `{distribution}.sh` → `wsl.sh` (if in WSL)
+- **Ubuntu/Debian**: Adds `apt` aliases, snap paths
 - **RHEL/CentOS**: Adds `yum`/`dnf` aliases, SELinux helpers, enterprise settings
 - **Fedora**: Adds modern `dnf` commands, Flatpak integration, toolbox support
+- **WSL**: Adds Windows clipboard integration (`pbcopy`/`pbpaste`), browser integration
 
-### **Supported Distributions**
+### **Supported Platforms**
+
+- ✅ macOS (Apple Silicon & Intel)
 - ✅ Ubuntu / Debian
 - ✅ RHEL / CentOS / Rocky Linux
 - ✅ Fedora
+- ✅ WSL (Windows Subsystem for Linux)
 - ✅ Any Linux distribution (falls back to base `linux.sh`)
+- ❌ Native Windows (PowerShell/CMD) - use WSL instead
 
 ---
 

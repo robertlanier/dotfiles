@@ -22,17 +22,9 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
         export BROWSER="explorer.exe"
     fi
     
-    # Windows tools aliases
-    alias cmd='cmd.exe'
-    alias powershell='powershell.exe'
-    alias pwsh='pwsh.exe'
-    alias explorer='explorer.exe'
-    alias notepad='notepad.exe'
-    
     # Clipboard integration
     if command -v clip.exe >/dev/null 2>&1; then
         alias pbcopy='clip.exe'
-        alias clipboard='clip.exe'
     fi
     
     if command -v powershell.exe >/dev/null 2>&1; then
@@ -48,22 +40,5 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
     if [ "$WSL_VERSION" = "1" ]; then
         # Disable bell in WSL 1 (can be annoying)
         set bell-style none 2>/dev/null || true
-    fi
-    
-    # Better file permissions for WSL (optional, uncomment if needed)
-    # umask 022
-    
-    # Windows home directory shortcut
-    if [ -d "/mnt/c/Users" ]; then
-        export WINHOME="/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')"
-        alias winhome='cd "$WINHOME"'
-        alias windocs='cd "$WINHOME/Documents"'
-        alias windown='cd "$WINHOME/Downloads"'
-        alias windesk='cd "$WINHOME/Desktop"'
-    fi
-    
-    # VSCode integration (if using VSCode on Windows)
-    if command -v code.exe >/dev/null 2>&1; then
-        alias code='code.exe'
     fi
 fi

@@ -31,11 +31,6 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
         alias pbpaste='powershell.exe Get-Clipboard'
     fi
     
-    # Docker Desktop integration (if using Docker Desktop for Windows)
-    if [ -S "/mnt/wsl/shared-docker/docker.sock" ]; then
-        export DOCKER_HOST="unix:///mnt/wsl/shared-docker/docker.sock"
-    fi
-    
     # Fix for WSL 1 interop issues
     if [ "$WSL_VERSION" = "1" ]; then
         # Disable bell in WSL 1 (can be annoying)

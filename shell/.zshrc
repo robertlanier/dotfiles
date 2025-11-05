@@ -8,6 +8,8 @@ if [ -r /etc/os-release ]; then
   . /etc/os-release
   [ -r "$HOME/.config/shell/os/linux.sh" ] && . "$HOME/.config/shell/os/linux.sh"
   [ -n "$ID" ] && [ -r "$HOME/.config/shell/os/$ID.sh" ] && . "$HOME/.config/shell/os/$ID.sh"
+  # WSL overlay (loads after distribution-specific config)
+  [ -r "$HOME/.config/shell/os/wsl.sh" ] && . "$HOME/.config/shell/os/wsl.sh"
 else
   case "$(uname -s)" in
     Darwin) [ -r "$HOME/.config/shell/os/darwin.sh" ] && . "$HOME/.config/shell/os/darwin.sh" ;;

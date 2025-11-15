@@ -50,11 +50,20 @@ dotfiles/
 
 ## ⚙️ Requirements
 
+**The `install.sh` script will automatically install these for you!** 
+
+Manual installation requirements:
+
 - [Git](https://git-scm.com/)
 - [GNU Stow](https://www.gnu.org/software/stow/)
-- (macOS) [Homebrew](https://brew.sh/) - optional but recommended
+- [Starship](https://starship.rs/) - Cross-shell prompt
+- [Zoxide](https://github.com/ajeetdsouza/zoxide) - Smart cd replacement  
+- [FZF](https://github.com/junegunn/fzf) - Fuzzy finder
+- [Neovim](https://neovim.io/) - Modern vim (optional, falls back to vim)
+- [Fastfetch](https://github.com/fastfetch-cli/fastfetch) - System info (optional)
+- (macOS) [Homebrew](https://brew.sh/) - Package manager
 
-### Install Stow
+### Manual Stow Installation (if needed)
 ```bash
 # macOS
 brew install stow
@@ -73,12 +82,33 @@ sudo pacman -S stow
 
 ## 🚀 Quick Start
 
-### macOS / Linux / WSL
+### Automated Installation (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/robertlanier/dotfiles.git
 cd dotfiles
+
+# Run the installation script (installs all requirements)
+./install.sh
+
+# Install dotfiles packages
+stow shell zsh git starship fzf nvim
+
+# Reload your shell
+exec $SHELL
+```
+
+### Manual Installation
+
+#### macOS / Linux / WSL
+
+```bash
+# Clone the repository
+git clone https://github.com/robertlanier/dotfiles.git
+cd dotfiles
+
+# Install requirements manually (see Requirements section below)
 
 # Install shell configuration (includes OS detection)
 stow shell

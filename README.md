@@ -85,18 +85,36 @@ sudo pacman -S stow
 ### Automated Installation (Recommended)
 
 ```bash
-# Clone the repository
+# Clone and deploy in one command
 git clone https://github.com/robertlanier/dotfiles.git
 cd dotfiles
-
-# Run the installation script (installs all requirements)
 ./install.sh
-
-# Install dotfiles packages
-stow shell zsh git starship fzf nvim
 
 # Reload your shell
 exec $SHELL
+```
+
+**What this does:**
+- ✅ Installs all required tools (starship, zoxide, fzf, neovim, etc.)
+- ✅ Creates timestamped backup of existing configs  
+- ✅ Deploys dotfiles using stow
+- ✅ Creates restore script for easy rollback
+- ✅ Verifies installation
+
+### Installation Options
+
+```bash
+# Full installation (default)
+./install.sh
+
+# Install dependencies only (no config changes)  
+./install.sh --deps-only
+
+# Skip backup (if you're confident)
+./install.sh --skip-backup
+
+# Install deps and backup, but don't deploy configs
+./install.sh --skip-deploy
 ```
 
 ### Manual Installation
@@ -132,6 +150,30 @@ wsl --install
 **That's it!** The shell configuration will automatically detect your OS and load the appropriate configurations.
 
 > **Note:** Native Windows (PowerShell/CMD) is not supported. Use WSL for Windows environments.
+
+### 🔄 Rollback & Uninstallation
+
+If you need to revert your dotfiles installation:
+
+```bash
+# Use the automatically created restore script
+~/.dotfiles-backup-YYYYMMDD-HHMMSS/restore.sh
+
+# Or use the uninstall script (interactive backup selection)
+./uninstall.sh
+
+# Auto-select most recent backup
+./uninstall.sh --auto
+
+# Use specific backup
+./uninstall.sh --backup ~/.dotfiles-backup-20241114-143022
+```
+
+**Restore features:**
+- ✅ Automatically removes dotfiles symlinks
+- ✅ Restores all original config files
+- ✅ Interactive backup selection
+- ✅ Complete rollback in seconds
 
 ---
 

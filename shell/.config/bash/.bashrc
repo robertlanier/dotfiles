@@ -1,10 +1,14 @@
 # Main bash configuration
 # This provides similar functionality to your zsh setup
 
+# system info
+fastfetch
+
+# (History settings now handled globally in linux.sh)
 # History configuration (similar to your zsh settings)
-export HISTSIZE=10000
-export HISTFILESIZE=20000
-export HISTCONTROL=ignoreboth  # Don't save duplicates or lines starting with space
+#export HISTSIZE=10000
+#export HISTFILESIZE=20000
+#export HISTCONTROL=ignoreboth  # Don't save duplicates or lines starting with space
 
 # Enable color support
 export FORCE_COLOR=1
@@ -35,4 +39,13 @@ elif command -v fzf >/dev/null 2>&1; then
         . /usr/share/fzf/key-bindings.bash
         . /usr/share/fzf/completion.bash
     fi
+fi
+
+# Restore native git completion (fixes fzf override issue)
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+elif [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+elif [ -f /usr/local/etc/bash_completion ]; then
+    . /usr/local/etc/bash_completion
 fi

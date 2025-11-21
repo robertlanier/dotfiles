@@ -10,6 +10,7 @@
 	email = robert.lanier@phreesia.com
 [core]
 	editor = code --wait
+	sshCommand = /mnt/c/Windows/System32/OpenSSH/ssh.exe
 [color]
 	ui = auto
 [init]

@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-PACKAGES_TO_STOW="shell zsh git starship fzf nvim"
+PACKAGES_TO_STOW="shell zsh git starship fzf nvim vscode"
 CONFIG_FILES=(
     ".zshrc"
     ".bashrc" 

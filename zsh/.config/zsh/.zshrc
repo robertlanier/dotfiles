@@ -58,7 +58,7 @@ eval "$(zoxide init zsh)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # FZF Theme: Catppuccin Mocha
-export FZF_THEME_FILE="$HOME/.config/fzf/themes/catppuccin/themes/catppuccin_mocha.theme"
+export FZF_THEME_FILE="$HOME/.config/fzf/themes/catppuccin/themes/catppuccin-fzf-mocha.sh"
 if [ -f "$FZF_THEME_FILE" ]; then
   source "$FZF_THEME_FILE"
 fi

@@ -1,0 +1,25 @@
+{
+  "recommendations": [
+    // Neovim integration
+    "asvetliakov.vscode-neovim",
+    
+    // Theme consistency
+    "catppuccin.catppuccin-vsc",
+    "catppuccin.catppuccin-vsc-icons",
+    
+    // Essential development extensions
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-typescript-next",
+    
+    // Git integration
+    "eamodio.gitlens",
+    
+    // Shell scripting
+    "timonwong.shellcheck",
+    "foxundermoon.shell-format",
+    
+    // Lua support (for Neovim config)
+    "sumneko.lua"
+  ]
+}

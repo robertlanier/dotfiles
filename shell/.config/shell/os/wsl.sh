@@ -13,15 +13,6 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
     
     # Windows interop - add Windows paths
     export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
-	
-	# --- Use Windows OpenSSH tools ---
-    alias ssh='/mnt/c/Windows/System32/OpenSSH/ssh.exe'
-    alias scp='/mnt/c/Windows/System32/OpenSSH/scp.exe'
-    alias sftp='/mnt/c/Windows/System32/OpenSSH/sftp.exe'
-    alias ssh-add='/mnt/c/Windows/System32/OpenSSH/ssh-add.exe'
-
-    # Use Windows SSH for Git too
-    git config --global core.sshCommand '/mnt/c/Windows/System32/OpenSSH/ssh.exe'
     
     # Browser integration
     if command -v wslview >/dev/null 2>&1; then

@@ -1,16 +1,39 @@
 # 🧩 Dotfiles
 
-Personal configuration files managed with **GNU Stow** for macOS (Apple Silicon), Linux (Ubuntu, RHEL, Fedora), and Windows via WSL.  
-Everything is modular and lives inside `~/.config`, with small dispatcher files in `~` to make cross-platform setup effortless.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Platform: macOS | Linux | WSL](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20WSL-green.svg)](https://github.com/robertlanier/dotfiles)
+[![Shell: Bash | Zsh](https://img.shields.io/badge/Shell-Bash%20%7C%20Zsh-informational.svg)](https://github.com/robertlanier/dotfiles)
 
-**✨ Features:**
+> **Personal configuration files managed with GNU Stow for cross-platform development**
+
+Modern, modular dotfiles with automatic OS detection, base + overlay architecture, and support for macOS, Linux distributions, and WSL. Everything lives in `~/.config` with thin dispatchers in `~` for effortless cross-platform setup.
+
+---
+
+## ✨ Features
+
 - 🔄 **Automatic OS detection** - configs adapt to macOS, Ubuntu, RHEL, Fedora, WSL automatically
 - 📦 **Modular packages** - install only what you need with stow
 - 🏗️ **Base + overlay architecture** - shared Linux configs with distribution-specific overlays
 - 🪟 **WSL support** - Windows integration via clipboard and browser
 - 🚀 **Dual-remote push** - sync to both GitLab and GitHub with different emails
+- 💾 **Backup & restore** - automatic backups with one-command rollback
+- 🎯 **Zero manual config** - automated dependency installation
 
 ---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Requirements](#️-requirements)
+- [Quick Start](#-quick-start)
+- [Directory Structure](#-directory-structure)
+- [OS Detection](#-how-os-detection-works)
+- [Available Packages](#-available-packages)
+- [Development](#-development--maintenance)
+- [Architecture](#️-architecture)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 📁 Directory Structure
 
@@ -219,14 +242,16 @@ The shell configuration automatically detects your operating system and loads th
 
 Each directory is a separate stow package that can be installed independently:
 
-- **`shell`** - Cross-platform shared shell configuration (common.sh, OS overlays)
-- **`bash`** - Bash-specific configuration and dispatchers
-- **`zsh`** - Zsh-specific configuration, plugins, and dispatchers  
-- **`git`** - Git configuration and aliases
-- **`nvim`** - Neovim configuration
-- **`starship`** - Cross-shell prompt configuration
-- **`fzf`** - Fuzzy finder configuration
-- **`vscode`** - VS Code settings and extensions
+| Package | Description |
+|---------|-------------|
+| `shell` | Cross-platform shared shell configuration (common.sh, OS overlays) |
+| `bash` | Bash-specific configuration and dispatchers |
+| `zsh` | Zsh-specific configuration, plugins, and dispatchers |
+| `git` | Git configuration and aliases |
+| `nvim` | Neovim configuration |
+| `starship` | Cross-shell prompt configuration |
+| `fzf` | Fuzzy finder configuration |
+| `vscode` | VS Code settings and extensions |
 
 ---
 
@@ -273,3 +298,40 @@ This dotfiles setup follows a **base + overlay** pattern with **shell-specific p
 - ✅ **Easy maintenance** - change base behavior once in `shell/`, affects all shells
 - ✅ **Clean separation** - OS-specific code in overlays, shell-specific code in packages
 - ✅ **Extensible** - easy to add new distributions or shells
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Quick Contribution Guide
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'feat: add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on code style, testing, and commit conventions.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [GNU Stow](https://www.gnu.org/software/stow/) - Symlink farm manager
+- [Starship](https://starship.rs/) - Cross-shell prompt
+- [Catppuccin](https://github.com/catppuccin) - Soothing pastel theme
+- [fzf-tab](https://github.com/Aloxaf/fzf-tab) - Zsh tab completion with fzf
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/robertlanier">Robert LaNier</a>
+</p>

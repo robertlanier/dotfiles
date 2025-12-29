@@ -3,6 +3,10 @@
 ^\.stow-local-ignore$
 ^README\.md$
 ^LICENSE$
+^CONTRIBUTING\.md$
+^CHANGELOG\.md$
+^\.editorconfig$
+^\.github$
 ^push-both\.sh$
 ^install\.sh$
 ^uninstall\.sh$

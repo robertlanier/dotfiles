@@ -22,7 +22,6 @@ CONFIG_FILES=(
     ".bash_profile"
     ".zprofile"
     ".gitconfig"
-    ".vimrc"
     ".config/starship.toml"
     ".config/nvim"
     ".config/git"

@@ -46,8 +46,8 @@ dotfiles/
 │
 ├─ fzf/.config/fzf/               # Fuzzy finder configuration
 ├─ git/.config/git/               # Git configuration
+├─ nvim/.config/nvim/             # Neovim configuration
 ├─ starship/.config/starship/     # Starship prompt configuration
-├─ vim/.config/vim/               # Vim configuration
 ├─ push-both.sh                   # Dual-remote push script
 ├─ .stow-local-ignore             # Files to exclude from stow
 └─ .gitignore                     # Git ignore rules
@@ -66,7 +66,7 @@ Manual installation requirements:
 - [Starship](https://starship.rs/) - Cross-shell prompt
 - [Zoxide](https://github.com/ajeetdsouza/zoxide) - Smart cd replacement  
 - [FZF](https://github.com/junegunn/fzf) - Fuzzy finder
-- [Neovim](https://neovim.io/) - Modern vim (optional, falls back to vim)
+- [Neovim](https://neovim.io/) - Modern text editor
 - [Fastfetch](https://github.com/fastfetch-cli/fastfetch) - System info (optional)
 - (macOS) [Homebrew](https://brew.sh/) - Package manager
 
@@ -142,7 +142,7 @@ stow shell
 stow bash zsh
 
 # Install other packages as needed
-stow git vim starship fzf
+stow git nvim starship fzf
 
 # Reload your shell or start a new terminal session
 exec $SHELL
@@ -223,10 +223,9 @@ Each directory is a separate stow package that can be installed independently:
 - **`bash`** - Bash-specific configuration and dispatchers
 - **`zsh`** - Zsh-specific configuration, plugins, and dispatchers  
 - **`git`** - Git configuration and aliases
-- **`vim`** - Vim configuration
+- **`nvim`** - Neovim configuration
 - **`starship`** - Cross-shell prompt configuration
 - **`fzf`** - Fuzzy finder configuration
-- **`nvim`** - Neovim configuration
 - **`vscode`** - VS Code settings and extensions
 
 ---

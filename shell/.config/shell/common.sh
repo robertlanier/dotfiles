@@ -6,7 +6,7 @@ export SRC="$HOME/src"
 # Add ~/bin to PATH if it exists
 [ -d "$HOME/bin" ] && case ":$PATH:" in *":$HOME/bin:"*) ;; *) PATH="$HOME/bin:$PATH";; esac
 
-# Set editor preference: neovim > vim
+# Set editor to neovim
 if command -v nvim >/dev/null 2>&1; then
     export EDITOR="nvim"
     export VISUAL="nvim"
@@ -14,9 +14,6 @@ if command -v nvim >/dev/null 2>&1; then
     alias vi="nvim"
     alias vim="nvim"
     alias vimdiff="nvim -d"
-elif command -v vim >/dev/null 2>&1; then
-    export EDITOR="vim"
-    export VISUAL="vim"
 else
     export EDITOR="${EDITOR:-vi}"
     export VISUAL="${VISUAL:-vi}"

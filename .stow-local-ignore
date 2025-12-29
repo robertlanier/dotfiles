@@ -5,6 +5,7 @@
 ^LICENSE$
 ^CONTRIBUTING\.md$
 ^CHANGELOG\.md$
+^cliff\.toml$
 ^\.editorconfig$
 ^\.github$
 ^push-both\.sh$

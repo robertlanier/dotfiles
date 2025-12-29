@@ -5,13 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Note:** This changelog is automatically generated using [git-cliff](https://git-cliff.org/).
+> To update: `git cliff --output CHANGELOG.md`
+
 ## [Unreleased]
 
 ### Added
+
 - MIT License
-- Contributing guidelines
-- EditorConfig for consistent formatting
-- Changelog for tracking changes
+- Contributing guidelines with Conventional Commits specification
+- EditorConfig for consistent code formatting
+- Changelog tracking with git-cliff automation
+- Comprehensive table of contents in README
+
+### Changed
+
+- README.md: Removed emojis for professional appearance
+- README.md: Improved structure and readability
 
 ## [1.0.0] - 2025-12-29
 

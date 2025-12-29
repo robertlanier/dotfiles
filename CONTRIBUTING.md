@@ -22,40 +22,106 @@ Thank you for your interest in contributing! This document provides guidelines f
   - Use meaningful variable names
   - Quote variables: `"$var"` instead of `$var`
 
-- **Documentation**: 
+- **Documentation**:
   - Update README.md if adding new features
   - Add inline comments for complex configurations
   - Update `.github/copilot-instructions.md` for architectural changes
+  - Changelog is auto-generated via git-cliff (don't edit manually)
 
 ### Commit Messages
 
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+This project follows [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification for automated changelog generation and semantic versioning.
+
+#### Commit Message Format
 
 ```
-<type>(<scope>): <subject>
+<type>[optional scope]: <description>
 
-<body>
+[optional body]
 
-<footer>
+[optional footer(s)]
 ```
 
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Formatting, missing semicolons, etc.
-- `refactor`: Code restructuring
-- `test`: Adding tests
-- `chore`: Maintenance tasks
+#### Commit Types
 
-**Examples:**
+| Type | Description | Changelog Section |
+|------|-------------|-------------------|
+| `feat` | New feature | Added |
+| `fix` | Bug fix | Fixed |
+| `docs` | Documentation only changes | Documentation |
+| `style` | Code style changes (formatting, no logic change) | Styling |
+| `refactor` | Code refactoring (no feature change or bug fix) | Changed |
+| `perf` | Performance improvements | Performance |
+| `test` | Adding or updating tests | Testing |
+| `chore` | Build process, tooling, dependencies | Miscellaneous Tasks |
+| `ci` | CI/CD pipeline changes | Miscellaneous Tasks |
+| `revert` | Revert previous commit | Reverted |
+
+#### Breaking Changes
+
+Add `!` after type/scope or include `BREAKING CHANGE:` in footer:
+
+```bash
+feat!: redesign shell configuration architecture
+
+BREAKING CHANGE: Previous shell configs are incompatible
+```
+
+#### Examples
+
+**Feature:**
 ```bash
 feat(zsh): add fzf-tab plugin for better completion
+```
 
+**Bug Fix:**
+```bash
 fix(install): correct stow package order on macOS
+```
 
+**Documentation:**
+```bash
 docs(readme): update installation instructions for WSL
 ```
+
+**Refactor:**
+```bash
+refactor(bash): separate dispatchers into dedicated package
+```
+
+**Multiple Scopes:**
+```bash
+feat(zsh,bash): add shared OS detection logic
+```
+
+#### Scopes
+
+Common scopes in this project:
+- `bash` - Bash-specific changes
+- `zsh` - Zsh-specific changes
+- `shell` - Shared shell configuration
+- `git` - Git configuration
+- `nvim` - Neovim configuration
+- `install` - Installation scripts
+- `docs` - Documentation files
+
+### Changelog Management
+
+This project uses [git-cliff](https://git-cliff.org/) for automated changelog generation.
+
+**Update changelog:**
+```bash
+# Generate changelog from all commits
+git cliff --output CHANGELOG.md
+
+# Preview without writing
+git cliff
+
+# Generate for specific version
+git cliff --tag v2.0.0 --output CHANGELOG.md
+```
+
+**Note:** Don't edit `CHANGELOG.md` manually. All changes are derived from commit messages.
 
 ### Testing Changes
 

@@ -1,4 +1,8 @@
 # --- Shared across shells ---
+
+# Source root for all repos (standardized across systems)
+export SRC="$HOME/src"
+
 # Add ~/bin to PATH if it exists
 [ -d "$HOME/bin" ] && case ":$PATH:" in *":$HOME/bin:"*) ;; *) PATH="$HOME/bin:$PATH";; esac
 

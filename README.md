@@ -135,11 +135,14 @@ cd dotfiles
 
 # Install requirements manually (see Requirements section below)
 
-# Install shell configuration (includes OS detection)
+# Install shell configuration (shared configs)
 stow shell
 
+# Install shell-specific packages
+stow bash zsh
+
 # Install other packages as needed
-stow zsh git vim starship fzf
+stow git vim starship fzf
 
 # Reload your shell or start a new terminal session
 exec $SHELL
@@ -154,7 +157,7 @@ wsl --install
 # Then follow the Linux/WSL instructions above inside WSL
 ```
 
-**That's it!** The shell configuration will automatically detect your OS and load the appropriate configurations.
+**That's it!** The bash and zsh dispatchers will automatically detect your OS and load the appropriate configurations from `~/.config/shell/`.
 
 > **Note:** Native Windows (PowerShell/CMD) is not supported. Use WSL for Windows environments.
 
@@ -216,12 +219,15 @@ The shell configuration automatically detects your operating system and loads th
 
 Each directory is a separate stow package that can be installed independently:
 
-- **`shell`** - Cross-platform shell configuration with OS detection
-- **`zsh`** - Zsh-specific configuration and plugins  
+- **`shell`** - Cross-platform shared shell configuration (common.sh, OS overlays)
+- **`bash`** - Bash-specific configuration and dispatchers
+- **`zsh`** - Zsh-specific configuration, plugins, and dispatchers  
 - **`git`** - Git configuration and aliases
 - **`vim`** - Vim configuration
 - **`starship`** - Cross-shell prompt configuration
 - **`fzf`** - Fuzzy finder configuration
+- **`nvim`** - Neovim configuration
+- **`vscode`** - VS Code settings and extensions
 
 ---
 
@@ -252,15 +258,19 @@ To add support for a new Linux distribution:
 
 ## 🏗️ Architecture
 
-This dotfiles setup follows a **base + overlay** pattern:
+This dotfiles setup follows a **base + overlay** pattern with **shell-specific packages**:
 
+### Shared Configuration (`shell/`)
 - **Cross-platform base**: `common.sh` for universal settings
 - **OS base**: `darwin.sh` (macOS) or `linux.sh` (Linux base)  
 - **Distribution overlay**: `ubuntu.sh`, `fedora.sh`, etc. for specific additions
-- **Thin dispatchers**: Small files in `~` that source the real configs in `~/.config`
 
-This architecture provides:
-- ✅ **No duplication** - shared configs in base files
-- ✅ **Easy maintenance** - change base behavior in one place
-- ✅ **Clean separation** - OS-specific code isolated
-- ✅ **Extensible** - easy to add new distributions
+### Shell Packages (`bash/`, `zsh/`)
+- **Thin dispatchers**: Small files in `~` (`.bashrc`, `.zshrc`) that detect OS and source shared configs
+- **Shell-specific configs**: Each shell has its own `.config/{bash,zsh}/` for shell-specific features
+
+### Benefits
+- ✅ **No duplication** - shared configs in base files, shell-specific logic isolated
+- ✅ **Easy maintenance** - change base behavior once in `shell/`, affects all shells
+- ✅ **Clean separation** - OS-specific code in overlays, shell-specific code in packages
+- ✅ **Extensible** - easy to add new distributions or shells

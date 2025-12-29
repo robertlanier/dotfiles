@@ -1,0 +1,41 @@
+# ~/.config/starship.toml
+# docs: https://starship.rs/config/
+
+add_newline = false
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$python\
+$line_break\
+$character"""
+
+# Use the Catppuccin palette
+palette = "catppuccin_mocha"   # or latte / frappe / macchiato
+
+# Import the palette definitions
+include = ["themes/catppuccin/palettes/mocha.toml"]
+
+[directory]
+style = "dimmed"
+truncation_length = 3
+
+[git_branch]
+style = "dimmed"
+format = " [$branch]($style)"
+
+[git_status]
+style = "dimmed"
+format = '[[($all_status$ahead_behind )]($style)]'
+
+[python]
+style = "dimmed"
+format = " [py:${virtualenv}]($style)"
+detect_extensions = ["py","ipynb"]
+detect_files = ["pyproject.toml","requirements.txt",".python-version"]
+
+[character]
+success_symbol = "›"
+error_symbol = "✗"
+vicmd_symbol = "∷"

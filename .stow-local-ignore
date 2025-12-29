@@ -6,3 +6,4 @@
 ^push-both\.sh$
 ^install\.sh$
 ^uninstall\.sh$
+\.DS_Store

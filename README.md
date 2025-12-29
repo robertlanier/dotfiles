@@ -16,9 +16,7 @@ Everything is modular and lives inside `~/.config`, with small dispatcher files 
 
 ```
 dotfiles/
-├─ shell/                           # Cross-platform shell configuration
-│  ├─ .zshrc → ~/.zshrc            # Thin dispatcher with OS detection
-│  ├─ .zprofile → ~/.zprofile      # Login shell dispatcher  
+├─ shell/                           # Cross-platform shared shell configuration
 │  └─ .config/shell/
 │     ├─ common.sh                 # Cross-platform shared config
 │     └─ os/                       # OS-specific configurations
@@ -29,7 +27,16 @@ dotfiles/
 │        ├─ rhel.sh                # RHEL/CentOS overlay
 │        └─ wsl.sh                 # WSL overlay (Windows integration)
 │
+├─ bash/                           # Bash-specific configuration
+│  ├─ .bashrc → ~/.bashrc         # Bash dispatcher with OS detection
+│  ├─ .bash_profile → ~/.bash_profile  # Bash login shell dispatcher
+│  └─ .config/bash/
+│     ├─ .bashrc                   # Main bash configuration
+│     └─ .bash_profile             # Bash login shell setup
+│
 ├─ zsh/                            # Zsh-specific configuration
+│  ├─ .zshrc → ~/.zshrc           # Zsh dispatcher with OS detection
+│  ├─ .zprofile → ~/.zprofile     # Zsh login shell dispatcher
 │  └─ .config/zsh/
 │     ├─ .zshrc                    # Main zsh configuration
 │     ├─ .zprofile                 # Homebrew shellenv setup

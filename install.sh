@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-PACKAGES_TO_STOW="shell zsh git starship fzf nvim vscode"
+PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim vscode"
 CONFIG_FILES=(
     ".zshrc"
     ".bashrc" 
@@ -286,7 +286,7 @@ BACKUP_DIR="$SCRIPT_DIR"
 if [ -f "../.stow-local-ignore" ]; then
     log_info "Unstowing dotfiles packages..."
     cd ..
-    stow -D shell zsh git starship fzf nvim 2>/dev/null || true
+    stow -D shell bash zsh git starship fzf nvim vscode 2>/dev/null || true
     cd "$BACKUP_DIR"
 else
     log_warning "Not in dotfiles directory, skipping unstow step"

@@ -68,7 +68,7 @@ unstow_dotfiles() {
     if [ -f ".stow-local-ignore" ]; then
         # We're in the dotfiles directory
         if command_exists stow; then
-            stow -D shell zsh git starship fzf nvim 2>/dev/null || true
+            stow -D shell bash zsh git starship fzf nvim vscode 2>/dev/null || true
             log_success "Dotfiles unstowed"
         else
             log_warning "Stow not found, manually removing symlinks..."

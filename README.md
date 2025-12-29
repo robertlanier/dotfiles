@@ -1,4 +1,4 @@
-# 🧩 Dotfiles
+# Dotfiles
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: macOS | Linux | WSL](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20WSL-green.svg)](https://github.com/robertlanier/dotfiles)
@@ -10,32 +10,39 @@ Modern, modular dotfiles with automatic OS detection, base + overlay architectur
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔄 **Automatic OS detection** - configs adapt to macOS, Ubuntu, RHEL, Fedora, WSL automatically
-- 📦 **Modular packages** - install only what you need with stow
-- 🏗️ **Base + overlay architecture** - shared Linux configs with distribution-specific overlays
-- 🪟 **WSL support** - Windows integration via clipboard and browser
-- 🚀 **Dual-remote push** - sync to both GitLab and GitHub with different emails
-- 💾 **Backup & restore** - automatic backups with one-command rollback
-- 🎯 **Zero manual config** - automated dependency installation
+- **Automatic OS detection** - configs adapt to macOS, Ubuntu, RHEL, Fedora, WSL automatically
+- **Modular packages** - install only what you need with stow
+- **Base + overlay architecture** - shared Linux configs with distribution-specific overlays
+- **WSL support** - Windows integration via clipboard and browser
+- **Dual-remote push** - sync to both GitLab and GitHub with different emails
+- **Backup & restore** - automatic backups with one-command rollback
+- **Zero manual config** - automated dependency installation
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Features](#-features)
-- [Requirements](#️-requirements)
-- [Quick Start](#-quick-start)
-- [Directory Structure](#-directory-structure)
-- [OS Detection](#-how-os-detection-works)
-- [Available Packages](#-available-packages)
-- [Development](#-development--maintenance)
-- [Architecture](#️-architecture)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Features](#features)
+- [Directory Structure](#directory-structure)
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+  - [Automated Installation](#automated-installation-recommended)
+  - [Installation Options](#installation-options)
+  - [Manual Installation](#manual-installation)
+  - [Rollback & Uninstallation](#rollback--uninstallation)
+- [How OS Detection Works](#how-os-detection-works)
+- [Available Packages](#available-packages)
+- [Development & Maintenance](#development--maintenance)
+- [Architecture](#architecture)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
-## 📁 Directory Structure
+---
+
+## Directory Structure
 
 ```
 dotfiles/
@@ -78,7 +85,7 @@ dotfiles/
 
 ---
 
-## ⚙️ Requirements
+## Requirements
 
 **The `install.sh` script will automatically install these for you!** 
 
@@ -110,7 +117,7 @@ sudo pacman -S stow
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Automated Installation (Recommended)
 
@@ -125,11 +132,12 @@ exec $SHELL
 ```
 
 **What this does:**
-- ✅ Installs all required tools (starship, zoxide, fzf, neovim, etc.)
-- ✅ Creates timestamped backup of existing configs  
-- ✅ Deploys dotfiles using stow
-- ✅ Creates restore script for easy rollback
-- ✅ Verifies installation
+
+- Installs all required tools (starship, zoxide, fzf, neovim, etc.)
+- Creates timestamped backup of existing configs
+- Deploys dotfiles using stow
+- Creates restore script for easy rollback
+- Verifies installation
 
 ### Installation Options
 
@@ -184,7 +192,9 @@ wsl --install
 
 > **Note:** Native Windows (PowerShell/CMD) is not supported. Use WSL for Windows environments.
 
-### 🔄 Rollback & Uninstallation
+---
+
+## Rollback & Uninstallation
 
 If you need to revert your dotfiles installation:
 
@@ -203,14 +213,15 @@ If you need to revert your dotfiles installation:
 ```
 
 **Restore features:**
-- ✅ Automatically removes dotfiles symlinks
-- ✅ Restores all original config files
-- ✅ Interactive backup selection
-- ✅ Complete rollback in seconds
+
+- Automatically removes dotfiles symlinks
+- Restores all original config files
+- Interactive backup selection
+- Complete rollback in seconds
 
 ---
 
-## 🔄 How OS Detection Works
+## How OS Detection Works
 
 The shell configuration automatically detects your operating system and loads the appropriate settings:
 
@@ -226,19 +237,19 @@ The shell configuration automatically detects your operating system and loads th
 - **Fedora**: Adds modern `dnf` commands, Flatpak integration, toolbox support
 - **WSL**: Adds Windows clipboard integration (`pbcopy`/`pbpaste`), browser integration
 
-### **Supported Platforms**
+### Supported Platforms
 
-- ✅ macOS (Apple Silicon & Intel)
-- ✅ Ubuntu / Debian
-- ✅ RHEL / CentOS / Rocky Linux
-- ✅ Fedora
-- ✅ WSL (Windows Subsystem for Linux)
-- ✅ Any Linux distribution (falls back to base `linux.sh`)
-- ❌ Native Windows (PowerShell/CMD) - use WSL instead
+- macOS (Apple Silicon & Intel)
+- Ubuntu / Debian
+- RHEL / CentOS / Rocky Linux
+- Fedora
+- WSL (Windows Subsystem for Linux)
+- Any Linux distribution (falls back to base `linux.sh`)
+- Native Windows (PowerShell/CMD) is not supported - use WSL instead
 
 ---
 
-## 📦 Available Packages
+## Available Packages
 
 Each directory is a separate stow package that can be installed independently:
 
@@ -255,7 +266,7 @@ Each directory is a separate stow package that can be installed independently:
 
 ---
 
-## 🔧 Development & Maintenance
+## Development & Maintenance
 
 ### Dual Remote Setup
 This repository pushes to both GitLab and GitHub with different commit emails:
@@ -280,7 +291,7 @@ To add support for a new Linux distribution:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 This dotfiles setup follows a **base + overlay** pattern with **shell-specific packages**:
 
@@ -294,14 +305,15 @@ This dotfiles setup follows a **base + overlay** pattern with **shell-specific p
 - **Shell-specific configs**: Each shell has its own `.config/{bash,zsh}/` for shell-specific features
 
 ### Benefits
-- ✅ **No duplication** - shared configs in base files, shell-specific logic isolated
-- ✅ **Easy maintenance** - change base behavior once in `shell/`, affects all shells
-- ✅ **Clean separation** - OS-specific code in overlays, shell-specific code in packages
-- ✅ **Extensible** - easy to add new distributions or shells
+
+- **No duplication** - shared configs in base files, shell-specific logic isolated
+- **Easy maintenance** - change base behavior once in `shell/`, affects all shells
+- **Clean separation** - OS-specific code in overlays, shell-specific code in packages
+- **Extensible** - easy to add new distributions or shells
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
@@ -317,13 +329,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on code style, te
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [GNU Stow](https://www.gnu.org/software/stow/) - Symlink farm manager
 - [Starship](https://starship.rs/) - Cross-shell prompt
@@ -333,5 +345,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/robertlanier">Robert LaNier</a>
+  Made with care by <a href="https://github.com/robertlanier">Robert LaNier</a>
 </p>

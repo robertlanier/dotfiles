@@ -2,14 +2,14 @@
 
 ## Architecture: Base + Overlay Pattern
 
-This is a **GNU Stow-based dotfiles manager** using a **layered configuration system** for cross-platform compatibility.
+This is a **GNU Stow-based dotfiles manager** using a **layered configuration system** for cross-platform compatibility. The project follows **XDG Base Directory Specification** for config file locations.
 
 ### Configuration Flow (Critical to understand)
 
 ```
 ~/.bashrc or ~/.zshrc (thin dispatchers)
   ↓
-~/.config/shell/common.sh (cross-platform base)
+~/.config/shell/common.sh (XDG variables + cross-platform base)
   ↓
 ~/.config/shell/os/darwin.sh OR linux.sh (OS base)
   ↓
@@ -21,6 +21,23 @@ This is a **GNU Stow-based dotfiles manager** using a **layered configuration sy
 ```
 
 **Key principle**: Thin dispatchers in `~` that source layered configs in `~/.config`. Never put logic in the dispatchers—they only detect OS and source the appropriate files.
+
+### XDG Base Directory Compliance
+
+This project follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html):
+
+- **`$XDG_CONFIG_HOME`** (default: `~/.config`) - Configuration files
+- **`$XDG_DATA_HOME`** (default: `~/.local/share`) - Application data
+- **`$XDG_STATE_HOME`** (default: `~/.local/state`) - State data (logs, history)
+- **`$XDG_CACHE_HOME`** (default: `~/.cache`) - Non-essential cached data
+
+**XDG-compliant locations:**
+- Bash history: `$XDG_STATE_HOME/bash/history`
+- Zsh history: `$XDG_STATE_HOME/zsh/history`
+- Zsh completion cache: `$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION`
+- All configs: `$XDG_CONFIG_HOME/{shell,bash,zsh,git,nvim,fzf,starship}`
+
+**Note**: Bash and zsh require thin dispatchers in `~` (`.bashrc`, `.zshrc`) because shells don't natively support XDG. These dispatchers immediately source configs from `$XDG_CONFIG_HOME`.
 
 ### Package Structure
 

@@ -4,11 +4,13 @@
 # system info
 fastfetch
 
-# (History settings now handled globally in linux.sh)
-# History configuration (similar to your zsh settings)
-#export HISTSIZE=10000
-#export HISTFILESIZE=20000
-#export HISTCONTROL=ignoreboth  # Don't save duplicates or lines starting with space
+# ------------- History (XDG-compliant) -------------
+export HISTFILE="$XDG_STATE_HOME/bash/history"
+mkdir -p "${HISTFILE%/*}"  # Create directory if it doesn't exist
+export HISTSIZE=100000
+export HISTFILESIZE=200000
+export HISTCONTROL=ignoreboth  # Don't save duplicates or lines starting with space
+export HISTTIMEFORMAT="%F %T "
 
 # Enable color support
 export FORCE_COLOR=1

@@ -48,7 +48,7 @@ Modern, modular dotfiles with automatic OS detection, base + overlay architectur
 dotfiles/
 ├─ shell/                           # Cross-platform shared shell configuration
 │  └─ .config/shell/
-│     ├─ common.sh                 # Cross-platform shared config
+│     ├─ common.sh                 # XDG variables, PATH, editor, aliases
 │     └─ os/                       # OS-specific configurations
 │        ├─ darwin.sh              # macOS (Homebrew, macOS aliases)
 │        ├─ linux.sh               # Base Linux (all distributions)
@@ -81,6 +81,15 @@ dotfiles/
 ├─ push-both.sh                   # Dual-remote push script
 ├─ .stow-local-ignore             # Files to exclude from stow
 └─ .gitignore                     # Git ignore rules
+
+# XDG Base Directories (created automatically)
+~/.config/                         # XDG_CONFIG_HOME - Configuration files
+~/.local/share/                    # XDG_DATA_HOME - Application data
+~/.local/state/                    # XDG_STATE_HOME - State data
+│  ├─ bash/history                # Bash history (XDG-compliant)
+│  └─ zsh/history                 # Zsh history (XDG-compliant)
+~/.cache/                          # XDG_CACHE_HOME - Cache files
+   └─ zsh/zcompdump-*             # Zsh completion cache
 ```
 
 ---

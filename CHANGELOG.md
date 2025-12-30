@@ -12,53 +12,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- MIT License
-- Contributing guidelines with Conventional Commits specification
-- EditorConfig for consistent code formatting
-- Changelog tracking with git-cliff automation
-- Comprehensive table of contents in README
+- Add cross-platform OS detection and dual-remote push script
+- Add comprehensive WSL support with Windows interop
+- Add bash support and neovim package, remove aliases
+- Add automated installation script for all platforms
+- Add complete automation for install/backup/restore workflow
+- **docs**: Add git-cliff for automated changelog generation
+- **xdg**: Implement full XDG Base Directory compliance
 
 ### Changed
 
-- README.md: Removed emojis for professional appearance
-- README.md: Improved structure and readability
+- Improve OS detection with base + overlay pattern
+- Simplify WSL config - remove unused aliases and shortcuts
+- Remove Docker Desktop integration from WSL config
+- Separate bash and zsh into dedicated packages
+- Remove vim, standardize on neovim
 
-## [1.0.0] - 2025-12-29
+### Documentation
 
-### Added
-- GNU Stow-based dotfiles management
-- Cross-platform support (macOS, Linux, WSL)
-- Base + overlay architecture for OS-specific configs
-- Automatic OS detection for Linux distributions
-- Separate bash and zsh packages with thin dispatchers
-- Shared shell configuration in `shell/` package
-- Dual-remote git workflow (GitLab + GitHub)
-- Automated installation script with dependency management
-- Backup and restore functionality
-- Starship prompt configuration
-- Zoxide (smart cd) integration
-- FZF fuzzy finder configuration
-- Neovim configuration
-- VS Code settings synchronization
+- Update README with current architecture and OS detection
+- Update README with WSL support and Windows clarification
+- Add professional project standards and documentation
+- Remove emojis and improve table of contents
 
-### Changed
-- Refactored shell structure: separated bash and zsh into dedicated packages
-- Standardized on neovim, removed vim package
-- Cleaned up shell package to only contain shared configs
+### Miscellaneous Tasks
 
-### Fixed
-- Stow ignore patterns for .DS_Store files
-- Git config merge conflicts during rebase
-
-## [0.1.0] - Initial Release
-
-### Added
-- Basic dotfiles structure
-- Initial shell configurations
-- Git configuration
+- Ignore OS junk and zsh session state
+- Untrack zsh session/history; add .gitignore rules
+- Added SRC env variable and updated README
+- **wsl**: Removed ssh aliases and core.sshCommand
 
 ---
+[Unreleased]: https://github.com/robertlanier/dotfiles/commits/main
 
-[Unreleased]: https://github.com/robertlanier/dotfiles/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/robertlanier/dotfiles/releases/tag/v1.0.0
-[0.1.0]: https://github.com/robertlanier/dotfiles/releases/tag/v0.1.0

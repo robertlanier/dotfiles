@@ -30,6 +30,7 @@ trim = true
 # changelog footer
 footer = """
 ---
+{% if version -%}
 [Unreleased]: https://github.com/robertlanier/dotfiles/compare/v{{ version }}...HEAD
 {% for release in releases -%}
     {% if release.previous.version -%}
@@ -37,6 +38,9 @@ footer = """
             https://github.com/robertlanier/dotfiles/compare/{{ release.previous.version }}..{{ release.version }}
     {% endif -%}
 {% endfor %}
+{% else -%}
+[Unreleased]: https://github.com/robertlanier/dotfiles/commits/main
+{% endif -%}
 """
 
 [git]

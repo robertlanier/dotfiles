@@ -23,9 +23,18 @@ $character
 """
 
 [directory]
+style = "bold lavender"
 truncate_to_repo = true
 truncation_length = 3
-style = "bold lavender"
+
+[directory.substitutions]
+"Desktop" = "  "
+"Documents" = "  "
+"Downloads" = "  "
+"Music" = " 󰎈 "
+"Pictures" = "  "
+"Videos" = "  "
+"GitHub" = " 󰊤 "
 
 [git_branch]
 style = "bold mauve"
@@ -37,6 +46,7 @@ format = '([($all_status$ahead_behind )]($style))'
 
 [python]
 style = "bold green"
+symbol = "  "
 format = " [py:${virtualenv}]($style)"
 detect_extensions = ["py","ipynb"]
 detect_files = ["pyproject.toml","requirements.txt",".python-version"]

@@ -1,18 +1,58 @@
 [credential]
-	helper = 
-	helper = /usr/local/share/gcm-core/git-credential-manager
+    # Clear any credential helpers inherited from system/global configs (e.g. Homebrew osxkeychain).
+    # This prevents multiple helpers from stacking and causing confusing prompts.
+    helper =
+
+    # Use Git Credential Manager (GCM) if installed. Good for GitHub/GitLab/Azure DevOps auth flows.
+    helper = /usr/local/share/gcm-core/git-credential-manager
+
 [credential "https://dev.azure.com"]
-	useHttpPath = true
-[push]
-	autoSetupRemote = true
-[user]
-	name = Robert LaNier
-	email = robert.lanier@phreesia.com
+    # Azure DevOps can require different creds per org/project URL path.
+    useHttpPath = true
+
 [core]
-	editor = code --wait
+    # Use VS Code for commit messages, rebase todo, etc.
+    editor = code --wait
+
+    # Optional: keep line endings sane across macOS/Linux/Windows collaboration.
+    # On macOS/Linux this is commonly "input". On Windows often "true".
+    # autocrlf = input
+
 [color]
-	ui = auto
+    # Enable colors when supported.
+    ui = auto
+
 [init]
-	defaultBranch = main
-[core]
-	editor = code --wait
+    # New repositories default to "main".
+    defaultBranch = main
+
+[pull]
+    # Avoid merge commits on pull; rebase local commits on top of fetched branch.
+    rebase = true
+
+[rebase]
+    # If you pull/rebase with local changes, stash automatically and restore after.
+    autoStash = true
+
+[fetch]
+    # Remove remote-tracking branches that were deleted on the remote.
+    prune = true
+
+[push]
+    # Automatically set upstream when pushing a new branch for the first time.
+    autoSetupRemote = true
+
+    # Safer default: only push the current branch to its upstream.
+    default = simple
+
+[diff]
+    # Often produces nicer diffs for code.
+    algorithm = histogram
+
+[merge]
+    # Show more useful conflict context (especially when rebasing).
+    conflictstyle = zdiff3
+
+[rerere]
+    # Reuse recorded resolution: Git remembers how you fixed a conflict and can reapply it later.
+    enabled = true

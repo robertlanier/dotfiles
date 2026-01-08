@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Untrack zsh session/history; add .gitignore rules
 - Added SRC env variable and updated README
 - **wsl**: Removed ssh aliases and core.sshCommand
+- **changelog**: Regenerate with git-cliff and fix template
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main

@@ -10,22 +10,15 @@ palette = "catppuccin_macchiato"
 
 # Wait 10 milliseconds for starship to check files under the current directory.
 scan_timeout = 10
-command_timeout = 500
-add_newline = false
+add_newline = true
 
-format = """
-$directory\
-$git_branch\
-$git_status\
-$python\
-$line_break\
-$character
-"""
+[hostname]
+ssh_symbol = " "
+format = "[$ssh_symbol$hostname]($style) in "
 
 [directory]
 style = "bold lavender"
 truncate_to_repo = true
-truncation_length = 3
 
 [directory.substitutions]
 "Desktop" = "  "
@@ -34,28 +27,29 @@ truncation_length = 3
 "Music" = " 󰎈 "
 "Pictures" = "  "
 "Videos" = "  "
-"GitHub" = " 󰊤 "
+
+# Note the use of Catppuccin color 'peach'
+[character]
+success_symbol = "[❯](peach)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](subtext1)" # For use with zsh-vi-mode
 
 [git_branch]
 style = "bold mauve"
-format = " [$branch]($style)"
+format = "[$symbol$branch]($style)"
+
+[git_commit]
+format = "[$hash$tag]($style)"
+tag_symbol = "   "
 
 [git_status]
 style = "bold peach"
-format = '([($all_status$ahead_behind )]($style))'
+format = "([ ($all_status$ahead_behind )]($style))"
 
 [python]
 style = "bold green"
 symbol = "  "
-format = " [py:${virtualenv}]($style)"
-detect_extensions = ["py","ipynb"]
-detect_files = ["pyproject.toml","requirements.txt",".python-version"]
-
-# Note the use of Catppuccin color 'peach'
-[character]
-success_symbol = "[[󰄛](green) ❯](peach)"
-error_symbol = "[[󰄛](red) ❯](peach)"
-vimcmd_symbol = "[󰄛 ❮](subtext1)" # For use with zsh-vi-mode
+format = "[$symbol$virtualenv]($style) "
 
 # Catppuchin Theme
 # Palette definitions

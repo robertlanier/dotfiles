@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **wsl**: Removed ssh aliases and core.sshCommand
 - **changelog**: Regenerate with git-cliff and fix template
 - Simplify dotfiles repo setup
+- Clean up workspace
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main

@@ -2,9 +2,8 @@
   "folders": [
     { "name": "dotfiles (repo)", "path": "." },
 
-    // Live targets (adjust if you don’t want to open $HOME in VS Code)
-    { "name": "~/.config", "path": "${env:HOME}/.config" },
-    { "name": "~ (selected files)", "path": "${env:HOME}" }
+    // Add any other config folders you want to manage here
+    { "name": "~/.config", "path": "/Users/robert.lanier/.config" }
   ],
   "settings": {
     // Makes searching dotfiles nicer
@@ -14,14 +13,14 @@
       "**/.DS_Store": true
     },
 
-    // Quality-of-life for dotfiles
+    // Quality of life settings
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
 
-    // If you edit shell scripts a lot
+    // Linting for shell scripts
     "shellcheck.enable": true,
 
-    // Optional: keep workspace from turning into “open everything in ~”
+    // Show full folder names in explorer
     "explorer.compactFolders": false
   }
 }

@@ -16,7 +16,6 @@ Modern, modular dotfiles with automatic OS detection, base + overlay architectur
 - **Modular packages** - install only what you need with stow
 - **Base + overlay architecture** - shared Linux configs with distribution-specific overlays
 - **WSL support** - Windows integration via clipboard and browser
-- **Dual-remote push** - sync to both GitLab and GitHub with different emails
 - **Backup & restore** - automatic backups with one-command rollback
 - **Zero manual config** - automated dependency installation
 
@@ -78,7 +77,6 @@ dotfiles/
 ├─ git/.config/git/               # Git configuration
 ├─ nvim/.config/nvim/             # Neovim configuration
 ├─ starship/.config/starship/     # Starship prompt configuration
-├─ push-both.sh                   # Dual-remote push script
 ├─ .stow-local-ignore             # Files to exclude from stow
 └─ .gitignore                     # Git ignore rules
 
@@ -276,20 +274,6 @@ Each directory is a separate stow package that can be installed independently:
 ---
 
 ## Development & Maintenance
-
-### Dual Remote Setup
-This repository pushes to both GitLab and GitHub with different commit emails:
-- **GitLab**: `robert.lanier@phreesia.com`
-- **GitHub**: `lanier@posteo.com`
-
-```bash
-# Push to both remotes simultaneously
-./push-both.sh main
-
-# Or push individually  
-git push origin main    # GitLab
-git push github main    # GitHub
-```
 
 ### Adding New OS Support
 To add support for a new Linux distribution:

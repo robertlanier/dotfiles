@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **changelog**: Regenerate with git-cliff and fix template
 - Simplify dotfiles repo setup
 - Clean up workspace
+- Modified starship prompt
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main

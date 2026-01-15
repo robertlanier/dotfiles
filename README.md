@@ -43,7 +43,7 @@ Modern, modular dotfiles with automatic OS detection, base + overlay architectur
 
 ## Directory Structure
 
-```
+```plaintext
 dotfiles/
 ├─ shell/                           # Cross-platform shared shell configuration
 │  └─ .config/shell/
@@ -94,7 +94,7 @@ dotfiles/
 
 ## Requirements
 
-**The `install.sh` script will automatically install these for you!** 
+**The `install.sh` script will automatically install these for you!**
 
 Manual installation requirements:
 
@@ -108,6 +108,7 @@ Manual installation requirements:
 - (macOS) [Homebrew](https://brew.sh/) - Package manager
 
 ### Manual Stow Installation (if needed)
+
 ```bash
 # macOS
 brew install stow
@@ -233,6 +234,7 @@ If you need to revert your dotfiles installation:
 The shell configuration automatically detects your operating system and loads the appropriate settings:
 
 ### **macOS (Darwin)**
+
 - Loads: `common.sh` → `darwin.sh`
 - Includes: Homebrew setup, macOS-specific aliases, BSD command variants
 
@@ -276,6 +278,7 @@ Each directory is a separate stow package that can be installed independently:
 ## Development & Maintenance
 
 ### Adding New OS Support
+
 To add support for a new Linux distribution:
 
 1. Create `shell/.config/shell/os/{distro}.sh`
@@ -289,11 +292,13 @@ To add support for a new Linux distribution:
 This dotfiles setup follows a **base + overlay** pattern with **shell-specific packages**:
 
 ### Shared Configuration (`shell/`)
+
 - **Cross-platform base**: `common.sh` for universal settings
 - **OS base**: `darwin.sh` (macOS) or `linux.sh` (Linux base)  
 - **Distribution overlay**: `ubuntu.sh`, `fedora.sh`, etc. for specific additions
 
 ### Shell Packages (`bash/`, `zsh/`)
+
 - **Thin dispatchers**: Small files in `~` (`.bashrc`, `.zshrc`) that detect OS and source shared configs
 - **Shell-specific configs**: Each shell has its own `.config/{bash,zsh}/` for shell-specific features
 
@@ -334,9 +339,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Starship](https://starship.rs/) - Cross-shell prompt
 - [Catppuccin](https://github.com/catppuccin) - Soothing pastel theme
 - [fzf-tab](https://github.com/Aloxaf/fzf-tab) - Zsh tab completion with fzf
-
----
-
-<p align="center">
-  Made with care by <a href="https://github.com/robertlanier">Robert LaNier</a>
-</p>

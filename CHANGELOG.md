@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Simplify dotfiles repo setup
 - Clean up workspace
 - Modified starship prompt
+- **documentation**: Removed dual remote section of README
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main

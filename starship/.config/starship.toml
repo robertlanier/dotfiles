@@ -12,6 +12,13 @@ palette = "catppuccin_macchiato"
 scan_timeout = 10
 add_newline = true
 
+[hostname]
+format = "[$ssh_symbol]($style) "
+
+[username]
+disabled = true
+format = "[$user]($style) in "
+
 [directory]
 style = "bold lavender"
 truncate_to_repo = true

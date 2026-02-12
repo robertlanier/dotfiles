@@ -104,7 +104,7 @@ Located in [bash/.bashrc](bash/.bashrc) and [zsh/.zshrc](zsh/.zshrc):
 ~/.dotfiles-backup-*/restore.sh # Direct restoration from backup
 ```
 
-**How uninstall works**: 
+**How uninstall works**:
 1. Runs `stow -D` to remove symlinks
 2. Restores files from timestamped backup directory
 

@@ -1,0 +1,46 @@
+exclude: |
+  (?x)^(
+    fzf/\.config/fzf/themes/catppuccin/.*|
+    bat/\.config/bat/themes/.*|
+    starship/\.config/starship\.toml\.bak|
+    \.git/.*
+  )$
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: shellcheck-system
+        name: ShellCheck (system)
+        entry: shellcheck
+        language: system
+        args: ["--shell=bash", "-x", "-e", "SC1090", "-e", "SC1091", "-e", "SC2016", "-e", "SC2148"]
+        files: |
+          (?x)^(
+            install\.sh|
+            uninstall\.sh|
+            shell/.*\.sh|
+            bash/.*\.bashrc|
+            bash/.*\.bash_profile
+          )$
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.11.0-1
+    hooks:
+      - id: shfmt
+        args: ["-w", "-s", "-i", "4", "-bn", "-ci"]
+        files: |
+          (?x)^(
+            install\.sh|
+            uninstall\.sh|
+            shell/.*\.sh|
+            bash/.*\.bashrc|
+            bash/.*\.bash_profile
+          )$

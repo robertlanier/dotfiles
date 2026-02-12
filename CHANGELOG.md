@@ -59,4 +59,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main
-

@@ -90,9 +90,18 @@ if [ -f ~/.fzf.zsh ]; then
 elif [ -f /usr/share/fzf/key-bindings.zsh ]; then
   source /usr/share/fzf/key-bindings.zsh
   [ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
+elif [ -f /usr/share/fzf/shell/key-bindings.zsh ]; then
+  source /usr/share/fzf/shell/key-bindings.zsh
+  [ -f /usr/share/fzf/shell/completion.zsh ] && source /usr/share/fzf/shell/completion.zsh
+elif [ -f /usr/local/opt/fzf/shell/key-bindings.zsh ]; then
+  source /usr/local/opt/fzf/shell/key-bindings.zsh
+  [ -f /usr/local/opt/fzf/shell/completion.zsh ] && source /usr/local/opt/fzf/shell/completion.zsh
+elif [ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]; then
+  source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+  [ -f /opt/homebrew/opt/fzf/shell/completion.zsh ] && source /opt/homebrew/opt/fzf/shell/completion.zsh
 fi
 
-# FZF Theme: Catppuccin Mocha
+# FZF Theme: Catppuccin Macchiato
 export FZF_THEME_FILE="$HOME/.config/fzf/themes/catppuccin/themes/catppuccin-fzf-macchiato.sh"
 if [ -f "$FZF_THEME_FILE" ]; then
   source "$FZF_THEME_FILE"

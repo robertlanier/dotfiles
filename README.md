@@ -52,7 +52,7 @@ dotfiles/
 │        ├─ darwin.sh              # macOS (Homebrew, macOS aliases)
 │        ├─ linux.sh               # Base Linux (all distributions)
 │        ├─ ubuntu.sh              # Ubuntu/Debian overlay
-│        ├─ fedora.sh              # Fedora overlay  
+│        ├─ fedora.sh              # Fedora overlay
 │        ├─ rhel.sh                # RHEL/CentOS overlay
 │        └─ wsl.sh                 # WSL overlay (Windows integration)
 │
@@ -101,7 +101,7 @@ Manual installation requirements:
 - [Git](https://git-scm.com/)
 - [GNU Stow](https://www.gnu.org/software/stow/)
 - [Starship](https://starship.rs/) - Cross-shell prompt
-- [Zoxide](https://github.com/ajeetdsouza/zoxide) - Smart cd replacement  
+- [Zoxide](https://github.com/ajeetdsouza/zoxide) - Smart cd replacement
 - [FZF](https://github.com/junegunn/fzf) - Fuzzy finder
 - [Neovim](https://neovim.io/) - Modern text editor
 - [Fastfetch](https://github.com/fastfetch-cli/fastfetch) - System info (optional)
@@ -153,7 +153,7 @@ exec $SHELL
 # Full installation (default)
 ./install.sh
 
-# Install dependencies only (no config changes)  
+# Install dependencies only (no config changes)
 ./install.sh --deps-only
 
 # Skip backup (if you're confident)
@@ -238,7 +238,7 @@ The shell configuration automatically detects your operating system and loads th
 - Loads: `common.sh` → `darwin.sh`
 - Includes: Homebrew setup, macOS-specific aliases, BSD command variants
 
-### **Linux Distributions**  
+### **Linux Distributions**
 
 - Loads: `common.sh` → `linux.sh` → `{distribution}.sh` → `wsl.sh` (if in WSL)
 - **Ubuntu/Debian**: Adds `apt` aliases, snap paths
@@ -294,7 +294,7 @@ This dotfiles setup follows a **base + overlay** pattern with **shell-specific p
 ### Shared Configuration (`shell/`)
 
 - **Cross-platform base**: `common.sh` for universal settings
-- **OS base**: `darwin.sh` (macOS) or `linux.sh` (Linux base)  
+- **OS base**: `darwin.sh` (macOS) or `linux.sh` (Linux base)
 - **Distribution overlay**: `ubuntu.sh`, `fedora.sh`, etc. for specific additions
 
 ### Shell Packages (`bash/`, `zsh/`)

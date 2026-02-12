@@ -27,13 +27,13 @@ command_exists() {
 find_backup() {
     local backup_pattern="$HOME/.dotfiles-backup-*"
     local latest_backup=""
-    
+
     for backup_dir in $backup_pattern; do
         if [ -d "$backup_dir" ]; then
             latest_backup="$backup_dir"
         fi
     done
-    
+
     echo "$latest_backup"
 }
 
@@ -41,30 +41,31 @@ find_backup() {
 list_backups() {
     local backup_pattern="$HOME/.dotfiles-backup-*"
     local found_backups=()
-    
+
     for backup_dir in $backup_pattern; do
         if [ -d "$backup_dir" ]; then
             found_backups+=("$backup_dir")
         fi
     done
-    
+
     if [ ${#found_backups[@]} -eq 0 ]; then
         return 1
     fi
-    
+
     echo "Available backups:"
     for i in "${!found_backups[@]}"; do
-        local backup_date=$(basename "${found_backups[$i]}" | sed 's/.dotfiles-backup-//')
-        echo "  $((i+1)). ${found_backups[$i]} (created: ${backup_date})"
+        local backup_date
+        backup_date=$(basename "${found_backups[$i]}" | sed 's/.dotfiles-backup-//')
+        echo "  $((i + 1)). ${found_backups[$i]} (created: ${backup_date})"
     done
-    
+
     return 0
 }
 
 # Unstow dotfiles
 unstow_dotfiles() {
     log_info "Removing dotfiles symlinks..."
-    
+
     if [ -f ".stow-local-ignore" ]; then
         # We're in the dotfiles directory
         if command_exists stow; then
@@ -85,7 +86,7 @@ manual_unstow() {
     local symlinks=(
         "$HOME/.zshrc"
         "$HOME/.bashrc"
-        "$HOME/.bash_profile"  
+        "$HOME/.bash_profile"
         "$HOME/.zprofile"
         "$HOME/.config/shell"
         "$HOME/.config/zsh"
@@ -95,7 +96,7 @@ manual_unstow() {
         "$HOME/.config/fzf"
         "$HOME/.config/nvim"
     )
-    
+
     for symlink in "${symlinks[@]}"; do
         if [ -L "$symlink" ]; then
             rm "$symlink"
@@ -110,30 +111,30 @@ select_backup() {
         log_error "No backups found in $HOME/.dotfiles-backup-*"
         echo ""
         echo "If you have a backup elsewhere, you can restore it manually:"
-        echo "1. Copy your backup files to their original locations"  
+        echo "1. Copy your backup files to their original locations"
         echo "2. Remove any dotfiles symlinks"
         return 1
     fi
-    
+
     echo ""
-    read -p "Select backup to restore (number) or 'q' to quit: " choice
-    
+    read -r -p "Select backup to restore (number) or 'q' to quit: " choice
+
     if [ "$choice" = "q" ]; then
         log_info "Uninstall cancelled"
         exit 0
     fi
-    
+
     local backup_pattern="$HOME/.dotfiles-backup-*"
     local found_backups=()
-    
+
     for backup_dir in $backup_pattern; do
         if [ -d "$backup_dir" ]; then
             found_backups+=("$backup_dir")
         fi
     done
-    
-    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#found_backups[@]} ]; then
-        echo "${found_backups[$((choice-1))]}"
+
+    if [[ $choice =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#found_backups[@]} ]; then
+        echo "${found_backups[$((choice - 1))]}"
         return 0
     else
         log_error "Invalid selection"
@@ -144,40 +145,40 @@ select_backup() {
 # Restore from backup
 restore_backup() {
     local backup_dir="$1"
-    
+
     if [ ! -d "$backup_dir" ]; then
         log_error "Backup directory not found: $backup_dir"
         return 1
     fi
-    
+
     log_info "Restoring from backup: $backup_dir"
-    
+
     local files_restored=0
-    
+
     # Find all files in backup (excluding restore.sh)
     while IFS= read -r -d '' file; do
-        local relative_path="${file#$backup_dir/}"
+        local relative_path="${file#"$backup_dir"/}"
         local target_path="$HOME/$relative_path"
-        
+
         # Skip restore.sh
-        if [[ "$relative_path" == "restore.sh" ]]; then
+        if [[ $relative_path == "restore.sh" ]]; then
             continue
         fi
-        
+
         # Create target directory if needed
         mkdir -p "$(dirname "$target_path")"
-        
+
         # Remove existing file/symlink
         if [ -L "$target_path" ] || [ -e "$target_path" ]; then
             rm -rf "$target_path"
         fi
-        
+
         # Restore backup
         cp -r "$file" "$target_path"
         log_info "Restored: $relative_path"
         files_restored=$((files_restored + 1))
     done < <(find "$backup_dir" -type f -print0)
-    
+
     log_success "Restored $files_restored files"
 }
 
@@ -186,11 +187,11 @@ main() {
     echo "🔄 Dotfiles Uninstall Script"
     echo "============================="
     echo ""
-    
+
     # Parse arguments
     local auto_mode=false
     local backup_dir=""
-    
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             --auto)
@@ -201,7 +202,7 @@ main() {
                 backup_dir="$2"
                 shift 2
                 ;;
-            -h|--help)
+            -h | --help)
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
                 echo "Options:"
@@ -217,9 +218,9 @@ main() {
                 ;;
         esac
     done
-    
+
     unstow_dotfiles
-    
+
     if [ "$auto_mode" = true ]; then
         backup_dir=$(find_backup)
         if [ -z "$backup_dir" ]; then
@@ -228,19 +229,18 @@ main() {
         fi
         log_info "Auto-selected backup: $backup_dir"
     elif [ -z "$backup_dir" ]; then
-        backup_dir=$(select_backup)
-        if [ $? -ne 0 ]; then
+        if ! backup_dir=$(select_backup); then
             exit 1
         fi
     fi
-    
+
     restore_backup "$backup_dir"
-    
+
     echo ""
     log_success "Dotfiles successfully uninstalled! 🎉"
     echo ""
     echo "Your original configuration has been restored."
-    echo "You may want to restart your shell: exec \$SHELL"
+    echo 'You may want to restart your shell: exec $SHELL'
 }
 
 # Run main function

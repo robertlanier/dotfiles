@@ -6,6 +6,11 @@ if command -v starship &>/dev/null; then
   eval "$(starship init zsh)"
 fi
 
+# Enable direnv if installed
+if command -v direnv &>/dev/null; then
+  eval "$(direnv hook zsh)"
+fi
+
 # ------------- Homebrew completions -------------
 if type brew &>/dev/null; then
   FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
@@ -99,8 +104,3 @@ if type brew &>/dev/null; then
 fi
 
 # ------------- Aliases (add yours below) -------------
-
-# Enable direnv if installed
-if command -v direnv >/dev/null 2>&1; then
-    eval "$(direnv hook zsh)"
-fi

@@ -305,15 +305,26 @@ install_direnv() {
     log_info "Installing direnv..."
     case "$OS-$DISTRO" in
         "linux-ubuntu"|"linux-debian")
-            sudo apt install -y direnv
+            if ! sudo apt install -y direnv 2>/dev/null; then
+                log_warning "direnv not available in apt repos, falling back to curl install..."
+                curl -sfL https://direnv.net/install.sh | bash
+            fi
             ;;
         "linux-rhel"|"linux-centos"|"linux-rocky"|"linux-almalinux"|"linux-fedora")
-            sudo $PACKAGE_MANAGER install -y direnv
+            if ! sudo $PACKAGE_MANAGER install -y direnv 2>/dev/null; then
+                log_warning "direnv not available in $PACKAGE_MANAGER repos, falling back to curl install..."
+                curl -sfL https://direnv.net/install.sh | bash
+            fi
             ;;
         "macos")
             brew install direnv
             ;;
     esac
+    # Final check
+    if ! command_exists direnv; then
+        log_error "direnv installation failed. Please install manually."
+        return 1
+    fi
 }
 
 # Create backup of existing config files

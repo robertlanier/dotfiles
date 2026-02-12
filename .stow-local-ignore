@@ -1,14 +1,21 @@
+# === VCS and metadata ===
+# Git and project metadata
 ^\.git$
+^\.github$
 ^\.gitignore$
 ^\.stow-local-ignore$
+^\.editorconfig$
+# macOS Finder metadata
+\.DS_Store
+
+# === Documentation and project files ===
 ^README\.md$
 ^LICENSE$
 ^CONTRIBUTING\.md$
 ^CHANGELOG\.md$
 ^cliff\.toml$
-^\.editorconfig$
-^\.github$
+
+# === Scripts ===
 ^push-both\.sh$
 ^install\.sh$
 ^uninstall\.sh$
-\.DS_Store

@@ -38,25 +38,6 @@ for bash_completion_file in \
     fi
 done
 
-# Enable ble.sh if installed (interactive bash only)
-if [[ $- == *i* ]]; then
-    for blesh_file in \
-        "$HOME/.local/share/blesh/ble.sh" \
-        /usr/share/blesh/ble.sh \
-        /usr/local/share/blesh/ble.sh \
-        /opt/homebrew/share/blesh/ble.sh; do
-        if [ -f "$blesh_file" ]; then
-            # Source once and attach the interactive editor.
-            [ -n "${BLE_VERSION-}" ] || source "$blesh_file" --noattach
-            command -v ble-attach >/dev/null 2>&1 && ble-attach
-            # Optional local ble.sh theme override (Catppuccin, etc.)
-            BLE_THEME_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/blesh/themes/catppuccin-macchiato.bash"
-            [ -f "$BLE_THEME_FILE" ] && source "$BLE_THEME_FILE"
-            break
-        fi
-    done
-fi
-
 # Use same starship prompt as zsh (if installed)
 if command -v starship >/dev/null 2>&1; then
     eval "$(starship init bash)"

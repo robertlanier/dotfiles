@@ -232,43 +232,6 @@ install_shellcheck() {
     esac
 }
 
-# Install ble.sh (bash line editor)
-install_blesh() {
-    local blesh_dir="${XDG_DATA_HOME:-$HOME/.local/share}/blesh"
-    local blesh_file="$blesh_dir/ble.sh"
-
-    if ! command_exists git; then
-        # If git is unavailable, still treat existing system installs as valid.
-        if [ -f "$blesh_file" ] || [ -f /usr/share/blesh/ble.sh ] || [ -f /usr/local/share/blesh/ble.sh ] || [ -f /opt/homebrew/share/blesh/ble.sh ]; then
-            log_success "ble.sh already installed"
-            return
-        fi
-        log_warning "git not found, cannot install ble.sh automatically"
-        return
-    fi
-
-    log_info "Installing ble.sh..."
-    mkdir -p "$(dirname "$blesh_dir")"
-
-    if [ -d "$blesh_dir/.git" ]; then
-        if git -C "$blesh_dir" pull --ff-only; then
-            log_success "ble.sh updated"
-        else
-            log_warning "ble.sh update failed; keeping existing checkout"
-        fi
-    elif [ -f "$blesh_file" ] || [ -f /usr/share/blesh/ble.sh ] || [ -f /usr/local/share/blesh/ble.sh ] || [ -f /opt/homebrew/share/blesh/ble.sh ]; then
-        log_success "ble.sh already installed"
-    elif [ -d "$blesh_dir" ] && [ ! -f "$blesh_file" ]; then
-        log_warning "Directory exists at $blesh_dir but is not a valid ble.sh install; skipping auto-install"
-    else
-        if git clone --depth 1 https://github.com/akinomyoga/ble.sh.git "$blesh_dir"; then
-            log_success "ble.sh installed to $blesh_dir"
-        else
-            log_warning "ble.sh install failed (network or git issue)"
-        fi
-    fi
-}
-
 # Install neovim
 install_neovim() {
     if command_exists nvim; then
@@ -540,14 +503,6 @@ verify_installation() {
         fi
     done
 
-    # Check ble.sh install locations
-    if [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ] || [ -f /usr/share/blesh/ble.sh ] || [ -f /usr/local/share/blesh/ble.sh ] || [ -f /opt/homebrew/share/blesh/ble.sh ]; then
-        log_success "ble.sh is installed"
-    else
-        log_warning "ble.sh not found in known install locations"
-        issues=$((issues + 1))
-    fi
-
     # Check Catppuccin themes used by shell configs
     local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 
@@ -555,13 +510,6 @@ verify_installation() {
         log_success "Catppuccin fzf theme is installed"
     else
         log_warning "Catppuccin fzf theme not found"
-        issues=$((issues + 1))
-    fi
-
-    if [ -f "$xdg_config_home/blesh/themes/catppuccin-macchiato.bash" ]; then
-        log_success "Catppuccin ble.sh theme is installed"
-    else
-        log_warning "Catppuccin ble.sh theme not found"
         issues=$((issues + 1))
     fi
 
@@ -656,7 +604,6 @@ main() {
     install_zoxide
     install_fzf
     install_shellcheck
-    install_blesh
     install_neovim
     install_bat
     install_delta
@@ -707,7 +654,6 @@ main() {
     echo '1. Restart your shell: exec $SHELL'
     echo "2. Enjoy your new dotfiles setup!"
     echo "3. Runtime checks:"
-    echo "   - type ble-attach"
     echo "   - complete -p git"
     echo "   - git config --get delta.syntax-theme"
     echo "   - bat --list-themes | rg Catppuccin"

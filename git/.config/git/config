@@ -39,7 +39,7 @@
 
 [rebase]
     # If you pull/rebase with local changes, stash automatically and restore after.
-    autoStash = true
+	autoStash = true
 
 [fetch]
     # Remove remote-tracking branches that were deleted on the remote.

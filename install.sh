@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim vscode"
+PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim vscode bat"
 CONFIG_FILES=(
     ".zshrc"
     ".bashrc" 
@@ -29,6 +29,7 @@ CONFIG_FILES=(
     ".config/bash"
     ".config/shell"
     ".config/fzf"
+    ".config/bat"
 )
 
 # Logging functions
@@ -453,6 +454,12 @@ main() {
     
     deploy_dotfiles
     verify_installation
+    
+    # Rebuild bat cache for delta syntax themes
+    if command_exists bat; then
+        log_info "Rebuilding bat cache for delta themes..."
+        bat cache --build >/dev/null 2>&1 && log_success "Bat cache rebuilt"
+    fi
     
     echo ""
     log_success "Installation complete! 🎉"

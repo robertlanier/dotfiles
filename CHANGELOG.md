@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add complete automation for install/backup/restore workflow
 - **docs**: Add git-cliff for automated changelog generation
 - **xdg**: Implement full XDG Base Directory compliance
+- Add delta pager with Catppuccin theme and bat stow package
+- Added new cli tools
 
 ### Changed
 
@@ -35,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add professional project standards and documentation
 - Remove emojis and improve table of contents
 
+### Fixed
+
+- Rebase confit with git config
+
 ### Miscellaneous Tasks
 
 - Ignore OS junk and zsh session state
@@ -46,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clean up workspace
 - Modified starship prompt
 - **documentation**: Removed dual remote section of README
+- **README**: Fixed markdown linting errors
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main

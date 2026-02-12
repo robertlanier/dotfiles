@@ -299,6 +299,37 @@ install_delta() {
     esac
 }
 
+# Ensure pip is available for tools installed via Python package index
+install_pip() {
+    if command_exists pip3 || command_exists pip; then
+        log_success "pip already installed"
+        return 0
+    fi
+
+    log_info "Installing pip..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            sudo apt install -y python3-pip
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+            if ! sudo "$PACKAGE_MANAGER" install -y python3-pip 2>/dev/null; then
+                sudo "$PACKAGE_MANAGER" install -y python-pip 2>/dev/null || true
+            fi
+            ;;
+        "macos"*)
+            brew install python
+            ;;
+    esac
+
+    if command_exists pip3 || command_exists pip; then
+        log_success "pip installed"
+        return 0
+    fi
+
+    log_warning "pip installation failed. Python packages may not install."
+    return 1
+}
+
 # Install git-cliff (changelog generator)
 install_gitcliff() {
     if command_exists git-cliff; then
@@ -308,19 +339,26 @@ install_gitcliff() {
 
     log_info "Installing git-cliff..."
     # pip is the most reliable cross-platform method
+    install_pip || true
     if command_exists pip3; then
         pip3 install --user git-cliff
     elif command_exists pip; then
         pip install --user git-cliff
+    elif [ "$OS" = "macos" ]; then
+        brew install git-cliff
     else
-        case "$OS-$DISTRO" in
-            "macos"*)
-                brew install git-cliff
-                ;;
-            *)
-                log_warning "pip not found. Install git-cliff manually: pip install git-cliff"
-                ;;
-        esac
+        log_warning "pip not found. Install git-cliff manually: pip install --user git-cliff"
+    fi
+
+    if command_exists git-cliff; then
+        log_success "git-cliff installed"
+        return
+    fi
+
+    local user_bin="$HOME/.local/bin"
+    if [ -x "$user_bin/git-cliff" ]; then
+        log_warning "git-cliff installed at $user_bin/git-cliff but $user_bin is not in PATH"
+        log_info "Add this to your shell config: export PATH=\"$user_bin:\$PATH\""
     fi
 }
 

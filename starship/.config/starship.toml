@@ -42,6 +42,9 @@ vimcmd_symbol = "[❮](subtext1)" # For use with zsh-vi-mode
 style = "bold mauve"
 format = "[$symbol$branch]($style)"
 
+[package]
+format = " [$symbol$version]($style) "
+
 [git_commit]
 format = "[$hash$tag]($style)"
 tag_symbol = "   "

@@ -1,8 +1,10 @@
 # Fastfetch (system info)
-fastfetch
+command -v fastfetch &>/dev/null && fastfetch
 
 # ------------- Prompt -------------
-eval "$(starship init zsh)"
+if command -v starship &>/dev/null; then
+  eval "$(starship init zsh)"
+fi
 
 # ------------- Homebrew completions -------------
 if type brew &>/dev/null; then
@@ -16,10 +18,25 @@ fi
 # ------------- Autosuggestions & Syntax Highlighting -------------
 # Subtle autosuggestions (soft gray)
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
-# Fast syntax highlighting (load AFTER autosuggestions) + Catppuccin Theme
-source "$(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+# Load autosuggestions (macOS via brew, Linux via common paths)
+if type brew &>/dev/null && [ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+# Load syntax highlighting (macOS via brew, Linux via common paths)
+if type brew &>/dev/null && [ -f "$(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
+  source "$(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+elif [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
 export FAST_HIGHLIGHT_STYLES_DIR="$HOME/.config/zsh/plugins/zsh-fsh/themes"
 export FAST_THEME='catppuccin_macchiato'   # or latte/frappe/macchiato
 
@@ -43,7 +60,7 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'r:|[._-]=* r:|=*'
 
 # Load fzf-tab (manual install path)
-source ~/.config/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+[ -f ~/.config/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh ] && source ~/.config/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
 
 # ------------- Behavior Tweaks -------------
 setopt auto_cd
@@ -58,10 +75,17 @@ WORDCHARS='*?_[]~=&;!#$%^(){}'
 
 # ------------- Navigation & Fuzzy -------------
 # Jump by memory (cd replacement)
-eval "$(zoxide init zsh)"
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh)"
+fi
 
 # FZF: use ctrl+r for history search menu
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+elif [ -f /usr/share/fzf/key-bindings.zsh ]; then
+  source /usr/share/fzf/key-bindings.zsh
+  [ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
+fi
 
 # FZF Theme: Catppuccin Mocha
 export FZF_THEME_FILE="$HOME/.config/fzf/themes/catppuccin/themes/catppuccin-fzf-macchiato.sh"
@@ -70,6 +94,8 @@ if [ -f "$FZF_THEME_FILE" ]; then
 fi
 
 # ------------- PATH -------------
-export PATH="$(brew --prefix)/bin:$(brew --prefix)/sbin:/usr/local/sbin:$PATH"
+if type brew &>/dev/null; then
+  export PATH="$(brew --prefix)/bin:$(brew --prefix)/sbin:/usr/local/sbin:$PATH"
+fi
 
 # ------------- Aliases (add yours below) -------------

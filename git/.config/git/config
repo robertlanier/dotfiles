@@ -11,13 +11,9 @@
     useHttpPath = true
 
 [core]
-    # Use VS Code for commit messages, rebase todo, etc.
-    editor = code --wait
-
-    # Optional: keep line endings sane across macOS/Linux/Windows collaboration.
-    # On macOS/Linux this is commonly "input". On Windows often "true".
-    # autocrlf = input
-
+	editor = code --wait
+	autocrlf = input
+	fileMode = false
 [color]
     # Enable colors when supported.
     ui = auto

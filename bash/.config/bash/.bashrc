@@ -43,11 +43,9 @@ elif command -v fzf >/dev/null 2>&1; then
     fi
 fi
 
-# Restore native git completion (fixes fzf override issue)
-if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-elif [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-elif [ -f /usr/local/etc/bash_completion ]; then
-    . /usr/local/etc/bash_completion
+# Restore git completion after fzf (fzf can override git's tab completion)
+if [ -f /usr/share/bash-completion/completions/git ]; then
+    . /usr/share/bash-completion/completions/git
+elif [ -f /usr/local/etc/bash_completion.d/git-completion.bash ]; then
+    . /usr/local/etc/bash_completion.d/git-completion.bash
 fi

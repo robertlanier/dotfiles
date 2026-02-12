@@ -225,6 +225,97 @@ install_neovim() {
     esac
 }
 
+# Install bat (for delta syntax themes)
+install_bat() {
+    if command_exists bat; then
+        log_success "Bat already installed"
+        return
+    fi
+    
+    log_info "Installing Bat..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu"|"linux-debian")
+            sudo apt install -y bat
+            ;;
+        "linux-rhel"|"linux-centos"|"linux-rocky"|"linux-almalinux"|"linux-fedora")
+            sudo $PACKAGE_MANAGER install -y bat
+            ;;
+        "macos")
+            brew install bat
+            ;;
+    esac
+}
+
+# Install delta (git diff pager)
+install_delta() {
+    if command_exists delta; then
+        log_success "Delta already installed"
+        return
+    fi
+    
+    log_info "Installing Delta..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu"|"linux-debian")
+            if ! sudo apt install -y git-delta 2>/dev/null; then
+                log_warning "Delta not in repos, install manually: https://github.com/dandavison/delta/releases"
+            fi
+            ;;
+        "linux-rhel"|"linux-centos"|"linux-rocky"|"linux-almalinux"|"linux-fedora")
+            if ! sudo $PACKAGE_MANAGER install -y git-delta 2>/dev/null; then
+                log_warning "Delta not in repos, install manually: https://github.com/dandavison/delta/releases"
+            fi
+            ;;
+        "macos")
+            brew install git-delta
+            ;;
+    esac
+}
+
+# Install git-cliff (changelog generator)
+install_gitcliff() {
+    if command_exists git-cliff; then
+        log_success "git-cliff already installed"
+        return
+    fi
+    
+    log_info "Installing git-cliff..."
+    # pip is the most reliable cross-platform method
+    if command_exists pip3; then
+        pip3 install --user git-cliff
+    elif command_exists pip; then
+        pip install --user git-cliff
+    else
+        case "$OS-$DISTRO" in
+            "macos")
+                brew install git-cliff
+                ;;
+            *)
+                log_warning "pip not found. Install git-cliff manually: pip install git-cliff"
+                ;;
+        esac
+    fi
+}
+
+# Install direnv (environment loader)
+install_direnv() {
+    if command_exists direnv; then
+        log_success "direnv already installed"
+        return
+    fi
+    log_info "Installing direnv..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu"|"linux-debian")
+            sudo apt install -y direnv
+            ;;
+        "linux-rhel"|"linux-centos"|"linux-rocky"|"linux-almalinux"|"linux-fedora")
+            sudo $PACKAGE_MANAGER install -y direnv
+            ;;
+        "macos")
+            brew install direnv
+            ;;
+    esac
+}
+
 # Create backup of existing config files
 backup_existing_configs() {
     log_info "Creating backup of existing configuration files..."
@@ -363,7 +454,7 @@ verify_installation() {
     done
     
     # Check if tools are available
-    local tools=("starship" "zoxide" "fzf" "nvim")
+    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv")
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
             log_success "$tool is available"
@@ -431,6 +522,10 @@ main() {
     install_zoxide
     install_fzf
     install_neovim
+    install_bat
+    install_delta
+    install_gitcliff
+    install_direnv
     
     if [ "$skip_deploy" = true ]; then
         log_success "Dependencies installation complete! 🎉"

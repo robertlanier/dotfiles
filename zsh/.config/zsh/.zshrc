@@ -99,3 +99,8 @@ if type brew &>/dev/null; then
 fi
 
 # ------------- Aliases (add yours below) -------------
+
+# Enable direnv if installed
+if command -v direnv >/dev/null 2>&1; then
+    eval "$(direnv hook zsh)"
+fi

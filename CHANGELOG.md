@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Rebase confit with git config
+- Add .DS_Store to ignore and reorganized the file
+- Added complete installation of direnv
 
 ### Miscellaneous Tasks
 
@@ -53,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modified starship prompt
 - **documentation**: Removed dual remote section of README
 - **README**: Fixed markdown linting errors
+- Updated changelog
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main

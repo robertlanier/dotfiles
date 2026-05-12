@@ -21,7 +21,7 @@
       ".zprofile": "shellscript",
       "*.sh": "shellscript",
       "*.bash": "shellscript",
-      ".stow-local-ignore": "plaintext"
+      "**/.stow-local-ignore": "plaintext"
     },
 
     "shellcheck.enable": true,

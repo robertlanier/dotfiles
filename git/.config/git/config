@@ -1,20 +1,19 @@
 [credential]
-    # Clear any credential helpers inherited from system/global configs (e.g. Homebrew osxkeychain).
-    # This prevents multiple helpers from stacking and causing confusing prompts.
-    helper =
-
-    # Use Git Credential Manager (GCM) if installed. Good for GitHub/GitLab/Azure DevOps auth flows.
-    helper = /usr/local/share/gcm-core/git-credential-manager
+	helper =
+	helper = manager
+    # Clear inherited helpers first (prevents osxkeychain stacking on macOS).
+    # "manager" invokes git-credential-manager from PATH — works on macOS, Linux, and WSL.
 
 [credential "https://dev.azure.com"]
+	useHttpPath = true
     # Azure DevOps can require different creds per org/project URL path.
-    useHttpPath = true
 
 [core]
 	editor = code --wait
 	autocrlf = input
 	fileMode = false
 	pager = delta
+	excludesfile = /Users/robert.lanier/.gitignore_global
 
 [interactive]
 	diffFilter = delta --color-only

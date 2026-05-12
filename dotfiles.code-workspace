@@ -1,26 +1,36 @@
 {
   "folders": [
     { "name": "dotfiles (repo)", "path": "." },
-
-    // Add any other config folders you want to manage here
-    { "name": "~/.config", "path": "/Users/robert.lanier/.config" }
+    { "name": "~/.config (live)", "path": "../.config" }
   ],
   "settings": {
-    // Makes searching dotfiles nicer
     "search.useIgnoreFiles": true,
     "search.exclude": {
       "**/.git": true,
       "**/.DS_Store": true
     },
 
-    // Quality of life settings
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
 
-    // Linting for shell scripts
+    // Treat dotfiles without extensions as shell scripts for linting + highlighting
+    "files.associations": {
+      ".bashrc": "shellscript",
+      ".bash_profile": "shellscript",
+      ".zshrc": "shellscript",
+      ".zprofile": "shellscript",
+      "*.sh": "shellscript",
+      "*.bash": "shellscript",
+      ".stow-local-ignore": "plaintext"
+    },
+
     "shellcheck.enable": true,
 
-    // Show full folder names in explorer
+    // Validate .pre-commit-config.yaml against the official schema
+    "yaml.schemas": {
+      "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.yaml"
+    },
+
     "explorer.compactFolders": false
   }
 }

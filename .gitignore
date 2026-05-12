@@ -8,3 +8,6 @@
 zsh/.config/zsh/sessions/
 **/*history
 **/*.session
+# machine-local overrides — not tracked in repo
+shell/.config/shell/local.sh
+git/.config/git/config.local

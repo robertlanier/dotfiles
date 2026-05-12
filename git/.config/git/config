@@ -1,19 +1,19 @@
+[include]
+	path = config.local
+
 [credential]
+	# Clear inherited helpers first (prevents osxkeychain stacking on macOS).
 	helper =
+	# "manager" invokes git-credential-manager from PATH — works on macOS, Linux, and WSL.
 	helper = manager
-    # Clear inherited helpers first (prevents osxkeychain stacking on macOS).
-    # "manager" invokes git-credential-manager from PATH — works on macOS, Linux, and WSL.
 
 [credential "https://dev.azure.com"]
+	# Azure DevOps can require different creds per org/project URL path.
 	useHttpPath = true
-    # Azure DevOps can require different creds per org/project URL path.
 
 [core]
-	editor = code --wait
 	autocrlf = input
-	fileMode = false
 	pager = delta
-	excludesfile = /Users/robert.lanier/.gitignore_global
 
 [interactive]
 	diffFilter = delta --color-only
@@ -25,41 +25,40 @@
 	syntax-theme = Catppuccin Macchiato
 
 [color]
-    # Enable colors when supported.
-    ui = auto
+	# Enable colors when supported.
+	ui = auto
 
 [init]
-    # New repositories default to "main".
-    defaultBranch = main
+	# New repositories default to "main".
+	defaultBranch = main
 
 [pull]
-    # Avoid merge commits on pull; rebase local commits on top of fetched branch.
-    rebase = true
+	# Avoid merge commits on pull; rebase local commits on top of fetched branch.
+	rebase = true
 
 [rebase]
-    # If you pull/rebase with local changes, stash automatically and restore after.
+	# If you pull/rebase with local changes, stash automatically and restore after.
 	autoStash = true
 
 [fetch]
-    # Remove remote-tracking branches that were deleted on the remote.
-    prune = true
+	# Remove remote-tracking branches that were deleted on the remote.
+	prune = true
 
 [push]
-    # Automatically set upstream when pushing a new branch for the first time.
-    autoSetupRemote = true
-
-    # Safer default: only push the current branch to its upstream.
-    default = simple
+	# Automatically set upstream when pushing a new branch for the first time.
+	autoSetupRemote = true
+	# Safer default: only push the current branch to its upstream.
+	default = simple
 
 [diff]
-    # Often produces nicer diffs for code.
-    algorithm = histogram
-    colorMoved = default
+	# Often produces nicer diffs for code.
+	algorithm = histogram
+	colorMoved = default
 
 [merge]
-    # Show more useful conflict context (especially when rebasing).
-    conflictstyle = zdiff3
+	# Show more useful conflict context (especially when rebasing).
+	conflictstyle = zdiff3
 
 [rerere]
-    # Reuse recorded resolution: Git remembers how you fixed a conflict and can reapply it later.
-    enabled = true
+	# Reuse recorded resolution: Git remembers how you fixed a conflict and can reapply it later.
+	enabled = true

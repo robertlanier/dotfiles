@@ -30,12 +30,6 @@ else
     export VISUAL="${VISUAL:-vi}"
 fi
 
-# Git will use the EDITOR variable, but you can also set it explicitly
-export GIT_EDITOR="$EDITOR"
-
-# For programs that need a visual editor (like crontab -e)
-export VISUAL="$EDITOR"
-
 # Machine-local overrides (not tracked in repo — put work/machine-specific config here)
 # shellcheck source=/dev/null
 [ -f "$XDG_CONFIG_HOME/shell/local.sh" ] && . "$XDG_CONFIG_HOME/shell/local.sh"

@@ -12,6 +12,12 @@ palette = "catppuccin_macchiato"
 scan_timeout = 10
 add_newline = true
 
+# Two-line prompt: context + time on line 1, clean input on line 2.
+# Time stays visible for time blindness; cmd_duration shows how long things took.
+format = """
+$directory$git_branch$git_status$python$jobs$cmd_duration$fill$time
+$character"""
+
 [hostname]
 disabled = true
 format = "[$ssh_symbol$hostname]($style) "
@@ -57,6 +63,22 @@ format = "([ ($all_status$ahead_behind )]($style))"
 style = "bold green"
 symbol = "  "
 format = "[$symbol$virtualenv]($style) "
+
+[cmd_duration]
+min_time = 2_000
+format = " [$duration]($style)"
+style = "bold yellow"
+
+[time]
+disabled = false
+format = "[$time]($style)"
+style = "bold overlay1"
+time_format = "%I:%M %p"
+
+[jobs]
+format = " [$symbol$number]($style)"
+style = "bold red"
+symbol = "✦ "
 
 # Catppuchin Theme
 # Palette definitions

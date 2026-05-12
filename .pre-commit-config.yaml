@@ -1,3 +1,4 @@
+---
 exclude: |
   (?x)^(
     fzf/\.config/fzf/themes/catppuccin/.*|
@@ -21,7 +22,17 @@ repos:
         name: ShellCheck (system)
         entry: shellcheck
         language: system
-        args: ["--shell=bash", "-x", "-e", "SC1090", "-e", "SC1091", "-e", "SC2016", "-e", "SC2148"]
+        args:
+          - "--shell=bash"
+          - "-x"
+          - "-e"
+          - "SC1090"
+          - "-e"
+          - "SC1091"
+          - "-e"
+          - "SC2016"
+          - "-e"
+          - "SC2148"
         files: |
           (?x)^(
             install\.sh|

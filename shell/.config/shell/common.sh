@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # --- Shared across shells ---
 
 # XDG Base Directory Specification
@@ -33,3 +34,7 @@ export GIT_EDITOR="$EDITOR"
 
 # For programs that need a visual editor (like crontab -e)
 export VISUAL="$EDITOR"
+
+# Machine-local overrides (not tracked in repo — put work/machine-specific config here)
+# shellcheck source=/dev/null
+[ -f "$XDG_CONFIG_HOME/shell/local.sh" ] && . "$XDG_CONFIG_HOME/shell/local.sh"

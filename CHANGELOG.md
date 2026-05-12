@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note:** This changelog is automatically generated using [git-cliff](https://git-cliff.org/).
 > To update: `git cliff --output CHANGELOG.md`
 
-## [Unreleased]
+## [1.0.0] - 2026-05-12
 
 ### Added
 
@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **xdg**: Implement full XDG Base Directory compliance
 - Add delta pager with Catppuccin theme and bat stow package
 - Added new cli tools
+- Added ble.sh line within .bashrc
+- **git**: Enabled rebase autostash
+- **shell**: Add machine-local override hook
+- **starship**: Add ADHD-optimized two-line prompt format
 
 ### Changed
 
@@ -42,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rebase confit with git config
 - Add .DS_Store to ignore and reorganized the file
 - Added complete installation of direnv
+- Removed hostname to fix rhel 9 issue
+- Ran precommit and fixed issues
+- Removed ble.sh
+- **fzf**: Vendor catppuccin theme fiels instead of broken gitlink
+- **bash**: Remove stale comment and cc() launcher function
+- **zsh**: Resolve FSH ordering bug, history conflict, and brew caching
+- **git**: Replace hardcoded GCM path with portable helper
 
 ### Miscellaneous Tasks
 
@@ -56,6 +67,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **documentation**: Removed dual remote section of README
 - **README**: Fixed markdown linting errors
 - Updated changelog
+- Updated CHANGELOG.md
+- Removed hostname and username from ssh prompt
+- Disabled hostname in prompt
+- **starship**: Removed 'is' from package format
+
+### Choare
+
+- **fzf**: Removed bloat from theme directory
 
 ---
 [Unreleased]: https://github.com/robertlanier/dotfiles/commits/main
+

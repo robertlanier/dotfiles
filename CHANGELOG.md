@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note:** This changelog is automatically generated using [git-cliff](https://git-cliff.org/).
 > To update: `git cliff --output CHANGELOG.md`
 
+## [1.0.7] - 2026-05-12
+
+### Documentation
+
+- Add CLAUDE.md and update copilot instructions
+
 ## [1.0.6] - 2026-05-12
 
 ### Fixed

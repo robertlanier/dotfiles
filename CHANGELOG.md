@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note:** This changelog is automatically generated using [git-cliff](https://git-cliff.org/).
 > To update: `git cliff --output CHANGELOG.md`
 
-## [1.0.0] - 2026-05-12
+## [1.0.1] - 2026-05-12
 
 ### Added
 
@@ -50,9 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ran precommit and fixed issues
 - Removed ble.sh
 - **fzf**: Vendor catppuccin theme fiels instead of broken gitlink
+- **shell**: Added local paths and auto ssh start:
 - **bash**: Remove stale comment and cc() launcher function
 - **zsh**: Resolve FSH ordering bug, history conflict, and brew caching
 - **git**: Replace hardcoded GCM path with portable helper
+- **shell**: Move SSH agent to linux.sh and fix redirect and XDG_RUNTIME_DIR bugs
+- **ci**: Add document start and expand shellcheck args to block sequence
 
 ### Miscellaneous Tasks
 

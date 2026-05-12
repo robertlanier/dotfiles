@@ -73,7 +73,7 @@ style = "bold yellow"
 disabled = false
 format = "[$time]($style)"
 style = "bold overlay1"
-time_format = "%I:%M %p"
+time_format = "%H:%M"
 
 [jobs]
 format = " [$symbol$number]($style)"

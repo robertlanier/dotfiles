@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note:** This changelog is automatically generated using [git-cliff](https://git-cliff.org/).
 > To update: `git cliff --output CHANGELOG.md`
 
+## [1.0.4] - 2026-05-12
+
+### Fixed
+
+- **starship**: Use 24-hour time format
+
 ## [1.0.3] - 2026-05-12
 
 ### Fixed

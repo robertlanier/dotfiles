@@ -47,10 +47,10 @@ Modern, modular dotfiles with automatic OS detection, base + overlay architectur
 dotfiles/
 ├─ shell/                           # Cross-platform shared shell configuration
 │  └─ .config/shell/
-│     ├─ common.sh                 # XDG variables, PATH, editor, aliases
+│     ├─ common.sh                 # XDG variables, PATH, editor, aliases, local override
 │     └─ os/                       # OS-specific configurations
 │        ├─ darwin.sh              # macOS (Homebrew, macOS aliases)
-│        ├─ linux.sh               # Base Linux (all distributions)
+│        ├─ linux.sh               # Base Linux (SSH agent, paths, pager)
 │        ├─ ubuntu.sh              # Ubuntu/Debian overlay
 │        ├─ fedora.sh              # Fedora overlay
 │        ├─ rhel.sh                # RHEL/CentOS overlay
@@ -271,7 +271,7 @@ Each directory is a separate stow package that can be installed independently:
 | `nvim` | Neovim configuration |
 | `starship` | Cross-shell prompt configuration |
 | `fzf` | Fuzzy finder configuration |
-| `vscode` | VS Code settings and extensions |
+| `bat` | Syntax-highlighted cat replacement configuration |
 
 ---
 

@@ -14,4 +14,33 @@ export HISTFILESIZE=20000
 
 # Set default pager
 export PAGER="${PAGER:-less}"
-export LESS="-R" # Raw color codes
+export LESS="-R"
+
+# SSH agent auto-start — Linux only (macOS manages this via launchd/Keychain)
+if command -v ssh-agent >/dev/null 2>&1 && command -v ssh-add >/dev/null 2>&1; then
+    if [ -z "$SSH_AUTH_SOCK" ] || ! ssh-add -l >/dev/null 2>&1; then
+        SSH_ENV="${XDG_RUNTIME_DIR:-$HOME/.local/state}/ssh-agent.env"
+        # Reuse a previously started agent if the env file exists
+        if [ -f "$SSH_ENV" ]; then
+            # shellcheck source=/dev/null
+            . "$SSH_ENV" >/dev/null
+        fi
+        # Start a new agent if still not running
+        if [ -z "$SSH_AUTH_SOCK" ] || ! ssh-add -l >/dev/null 2>&1; then
+            ssh-agent -s > "$SSH_ENV"
+            # shellcheck source=/dev/null
+            . "$SSH_ENV" >/dev/null
+        fi
+        # Load all private keys from ~/.ssh (detected by content, not extension)
+        if [ -d "$HOME/.ssh" ]; then
+            for key in "$HOME/.ssh/"*; do
+                case "$key" in
+                    *.pub|*.crt|*.pem|*.txt) continue ;;
+                esac
+                if grep -q 'PRIVATE KEY' "$key" 2>/dev/null; then
+                    ssh-add "$key" 2>/dev/null
+                fi
+            done
+        fi
+    fi
+fi

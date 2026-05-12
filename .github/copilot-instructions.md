@@ -93,7 +93,7 @@ Located in [bash/.bashrc](bash/.bashrc) and [zsh/.zshrc](zsh/.zshrc):
 1. Detects OS and distro from `/etc/os-release` or `uname`
 2. Installs: git, stow, starship, zoxide, fzf, neovim, fastfetch
 3. Backs up existing configs to `~/.dotfiles-backup-YYYYMMDD-HHMMSS/`
-4. Runs `stow` for all packages: `shell bash zsh git starship fzf nvim vscode`
+4. Runs `stow` for all packages: `shell bash zsh git starship fzf nvim bat`
 5. Creates `restore.sh` script in backup directory
 
 ### Rollback/Uninstallation
@@ -136,6 +136,10 @@ See [.stow-local-ignore](.stow-local-ignore) - excludes:
 - `.stow-local-ignore` itself
 
 **When adding files**: If a file shouldn't be symlinked to `$HOME`, add it to `.stow-local-ignore`.
+
+### Machine-Local Overrides
+
+`common.sh` sources `~/.config/shell/local.sh` if it exists. This file is **not tracked in the repo** — it is created manually on each machine for machine-specific config (work tools, private aliases, etc.). Never put machine-specific logic in the tracked shell configs; use `local.sh` instead.
 
 ### Shell Agnostic Design
 
@@ -218,9 +222,11 @@ Each function has OS-specific branches for macOS (brew), Ubuntu (apt), Fedora/RH
 
 **Problem**: Duplication between Ubuntu/Fedora/RHEL configs (90% identical, 10% different).
 
-**Solution**: `linux.sh` contains shared Linux configs, distribution files only add/override specifics.
+**Solution**: `linux.sh` contains shared Linux configs (including SSH agent auto-start), distribution files only add/override specifics.
 
 **Benefit**: Change base Linux behavior once; distribution overlays stay minimal.
+
+**Note**: SSH agent auto-start lives in `linux.sh` only — macOS manages this via launchd/Keychain and does not need it.
 
 ### Why Dual Remotes?
 

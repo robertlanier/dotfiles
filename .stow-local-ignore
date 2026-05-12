@@ -13,6 +13,7 @@
 ^LICENSE$
 ^CONTRIBUTING\.md$
 ^CHANGELOG\.md$
+^CLAUDE\.md$
 ^cliff\.toml$
 
 # === Scripts ===

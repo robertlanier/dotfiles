@@ -12,8 +12,12 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
-# Shell scripts
+# Shell scripts (extensions and extensionless dotfiles)
 [*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 4
+
+[{.bashrc,.bash_profile,.zshrc,.zprofile}]
 indent_style = space
 indent_size = 4
 
@@ -33,8 +37,11 @@ indent_size = 2
 indent_style = space
 indent_size = 2
 
-# Makefiles
+# Makefiles and git config (both require tabs)
 [Makefile]
+indent_style = tab
+
+[git/.config/git/config]
 indent_style = tab
 
 [*.py]

@@ -15,17 +15,13 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
     export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
 
     # Browser integration
-    # wslview (from wslu package) opens URLs in the default Windows browser.
-    # Install on Fedora: sudo dnf copr enable wsl-utilities/wslu && sudo dnf install wslu
+    # Prefer wslview (wslu) if available; fall back to explorer.exe.
+    # Note: Fedora's xdg-open has native WSL support and uses explorer.exe automatically,
+    # so wslu is optional. Build from source: https://github.com/wslutilities/wslu
     if command -v wslview >/dev/null 2>&1; then
         export BROWSER="wslview"
     else
         export BROWSER="explorer.exe"
-    fi
-
-    # xdg-open: point to wslview so CLI tools (including op) can open Windows browser
-    if command -v wslview >/dev/null 2>&1 && ! command -v xdg-open >/dev/null 2>&1; then
-        alias xdg-open='wslview'
     fi
 
     # Clipboard integration

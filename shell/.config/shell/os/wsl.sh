@@ -33,27 +33,17 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
         alias pbpaste='powershell.exe Get-Clipboard'
     fi
 
-    # 1Password CLI integration
-    # Connects `op` to the Windows 1Password desktop app over a Unix socket.
-    #
-    # Required Windows-side setup (do once):
-    #   1Password > Settings > Developer > check "Connect with 1Password CLI"
-    #   1Password > Settings > Developer > check "Use the SSH agent"
-    #
-    # The socket is created by the Windows app; try known locations in order.
-    _op_sock_found=""
-    for _op_sock in \
-        "/mnt/c/Users/$(whoami)/AppData/Local/1Password/app/8/1Password.sock" \
-        "$HOME/.1password/agent.sock"; do
-        if [ -S "$_op_sock" ]; then
-            _op_sock_found="$_op_sock"
-            break
-        fi
-    done
-    if [ -n "$_op_sock_found" ]; then
-        export OP_AGENT_SOCK="$_op_sock_found"
+    # 1Password CLI — use the Windows op.exe (via Scoop) so it connects to the
+    # Windows 1Password desktop app natively without needing a Unix socket.
+    # Requires: 1Password > Settings > Developer > "Connect with 1Password CLI"
+    if [ -f "/mnt/e/Scoop/apps/1password-cli/current/op.exe" ]; then
+        alias op='op.exe'
+        # Add Scoop 1password-cli to PATH so scripts calling 'op.exe' also work
+        case ":$PATH:" in
+            *":/mnt/e/Scoop/apps/1password-cli/current:"*) ;;
+            *) PATH="$PATH:/mnt/e/Scoop/apps/1password-cli/current" ;;
+        esac
     fi
-    unset _op_sock _op_sock_found
 
     # Fix for WSL 1 interop issues
     if [ "$WSL_VERSION" = "1" ]; then

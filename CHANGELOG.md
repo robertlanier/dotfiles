@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Note:** This changelog is automatically generated using [git-cliff](https://git-cliff.org/).
 > To update: `git cliff --output CHANGELOG.md`
 
+## [1.2.0] - 2026-07-14
+
+### Added
+
+- **shell,wsl,fedora**: Cargo PATH, Fedora 42 flatpak paths, WSL 1Password CLI
+- **install,ci,shell,nvim**: Migrate to lefthook, add Brewfile, cross-platform Homebrew
+
+### Fixed
+
+- **wsl**: Remove unavailable wslu COPR note, xdg-open alias; Fedora xdg-open handles WSL natively
+- **wsl**: Use Windows op.exe via Scoop instead of Linux op CLI
+- **wsl**: Remove machine-specific 1Password/Scoop block
+- **shell**: Bind SSH agent to a fixed socket path
+
 ## [1.1.0] - 2026-05-12
 
 ### Added

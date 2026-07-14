@@ -1,0 +1,26 @@
+pre-commit:
+  commands:
+    check-merge-conflict:
+      run: grep -rEn "(<<<<<<< HEAD|=======|>>>>>>> )" {staged_files} && exit 1 || exit 0
+
+    shellcheck:
+      glob: "{*.sh,shell/**/*.sh,bash/.*,zsh/.*}"
+      run: shellcheck --shell=bash -x -e SC1090 -e SC1091 -e SC2016 -e SC2148 {staged_files}
+
+    shfmt:
+      glob: "{*.sh,shell/**/*.sh,bash/.*}"
+      run: shfmt -w -s -i 4 -bn -ci {staged_files}
+
+pre-push:
+  commands:
+    changelog:
+      # Only runs when pushing a tag. Regenerates CHANGELOG.md and aborts if
+      # it's stale, so you're forced to commit the update before pushing.
+      run: |
+        git describe --exact-match HEAD >/dev/null 2>&1 || exit 0
+        git-cliff --output CHANGELOG.md
+        if ! git diff --quiet CHANGELOG.md; then
+          echo "CHANGELOG.md is stale. Commit the updated changelog before pushing:"
+          echo "  git add CHANGELOG.md && git commit -m 'chore(release): update changelog'"
+          exit 1
+        fi

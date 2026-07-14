@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # ~/.bash_profile (managed by stow)
 # Stub: source real config under ~/.config/bash
 

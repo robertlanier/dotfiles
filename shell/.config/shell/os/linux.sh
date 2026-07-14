@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Base Linux configuration - shared by all Linux distributions
 # Linux specific environment
 export BROWSER="${BROWSER:-firefox}"

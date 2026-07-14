@@ -68,6 +68,8 @@ git commit -m "chore(release): prepare for vX.Y.Z"
 git push origin main --tags
 ```
 
+The pre-push hook verifies the changelog is current when pushing a tag. If it's stale, the push is aborted so you can commit the update first.
+
 Bump patch for fixes, minor for new features.
 
 ## Commit Convention
@@ -78,6 +80,8 @@ Common scopes: `bash`, `zsh`, `shell`, `git`, `nvim`, `starship`, `fzf`, `bat`, 
 
 **Do not add a `Co-Authored-By` trailer on commits to this repo.**
 
-## Pre-commit Hooks
+## Git Hooks (Lefthook)
 
-ShellCheck and shfmt run on all shell files. ShellCheck excludes SC1090, SC1091, SC2016, SC2148 — these are expected for a cross-platform dotfiles repo. Shfmt enforces 4-space indent, binary-op newlines, case indent.
+ShellCheck and shfmt run on staged shell files at pre-commit. ShellCheck excludes SC1090, SC1091, SC2016, SC2148 — these are expected for a cross-platform dotfiles repo. Shfmt enforces 4-space indent, binary-op newlines, case indent.
+
+Run `lefthook install` once after cloning to register the hooks.

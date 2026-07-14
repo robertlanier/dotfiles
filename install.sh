@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim vscode bat"
+PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim bat"
 CONFIG_FILES=(
     ".zshrc"
     ".bashrc"
@@ -87,16 +87,76 @@ install_package_manager() {
             PACKAGE_MANAGER="dnf"
             ;;
         "macos"*)
-            if ! command_exists brew; then
-                log_info "Installing Homebrew..."
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-                # Add Homebrew to PATH for current session
-                eval "$(/opt/homebrew/bin/brew shellenv)"
-            else
-                log_success "Homebrew already installed"
-            fi
+            # Homebrew install is handled by install_homebrew() via run_brew_bundle
             ;;
     esac
+}
+
+# Install Homebrew (macOS and Linux)
+install_homebrew() {
+    if command_exists brew; then
+        log_success "Homebrew already installed"
+        return
+    fi
+
+    log_info "Installing Homebrew..."
+
+    if [ "$OS" = "linux" ]; then
+        # Homebrew on Linux requires build tools
+        log_info "Installing Homebrew build dependencies..."
+        case "$OS-$DISTRO" in
+            "linux-ubuntu" | "linux-debian")
+                sudo apt install -y build-essential procps curl file git
+                ;;
+            "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+                sudo "$PACKAGE_MANAGER" groupinstall -y "Development Tools"
+                sudo "$PACKAGE_MANAGER" install -y procps-ng curl file git
+                ;;
+        esac
+    fi
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Add Homebrew to PATH for the current session
+    for brew_prefix in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
+        if [ -x "${brew_prefix}/bin/brew" ]; then
+            eval "$("${brew_prefix}/bin/brew" shellenv)"
+            break
+        fi
+    done
+
+    if ! command_exists brew; then
+        log_error "Homebrew installation failed."
+        exit 1
+    fi
+
+    log_success "Homebrew installed"
+}
+
+# Verify Homebrew is present and run brew bundle
+run_brew_bundle() {
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local brewfile="${script_dir}/Brewfile"
+
+    if [ ! -f "$brewfile" ]; then
+        log_warning "Brewfile not found at $brewfile — skipping brew bundle"
+        return
+    fi
+
+    log_info "Checking Homebrew installation..."
+    install_homebrew
+
+    log_info "Verifying Homebrew is functional..."
+    if ! brew --version >/dev/null 2>&1; then
+        log_error "Homebrew is not functional. Cannot run brew bundle."
+        exit 1
+    fi
+    log_success "Homebrew $(brew --version | head -1)"
+
+    log_info "Running brew bundle..."
+    brew bundle --file="$brewfile"
+    log_success "brew bundle complete"
 }
 
 # Install core dependencies
@@ -228,6 +288,35 @@ install_shellcheck() {
             if ! brew install shellcheck 2>/dev/null; then
                 log_warning "brew install shellcheck failed, install manually: https://github.com/koalaman/shellcheck#installing"
             fi
+            ;;
+    esac
+}
+
+# Install lefthook (git hooks manager)
+install_lefthook() {
+    if command_exists lefthook; then
+        log_success "Lefthook already installed"
+        return
+    fi
+
+    log_info "Installing Lefthook..."
+    case "$OS" in
+        "macos")
+            brew install lefthook
+            ;;
+        "linux")
+            # Download the latest release binary directly — no third-party repo needed
+            local arch
+            arch=$(uname -m)
+            case "$arch" in
+                aarch64) arch="arm64" ;;
+                x86_64) ;;
+                *) log_warning "Unsupported architecture: $arch. Install lefthook manually."; return ;;
+            esac
+            local latest_url="https://github.com/evilmartians/lefthook/releases/latest/download/lefthook_Linux_${arch}"
+            mkdir -p "$HOME/.local/bin"
+            curl -fsSL "$latest_url" -o "$HOME/.local/bin/lefthook"
+            chmod +x "$HOME/.local/bin/lefthook"
             ;;
     esac
 }
@@ -393,6 +482,47 @@ install_direnv() {
     fi
 }
 
+# Install git-credential-manager (GCM)
+install_gcm() {
+    if command_exists git-credential-manager; then
+        log_success "git-credential-manager already installed"
+        return
+    fi
+
+    log_info "Installing git-credential-manager..."
+    case "$OS" in
+        "macos")
+            brew install --cask git-credential-manager
+            ;;
+        "linux")
+            # On WSL, GCM from the Windows Git install is available via interop — no Linux binary needed.
+            if [ -n "${WSL_DISTRO_NAME}" ]; then
+                log_info "WSL detected — using Windows GCM via interop (no Linux install needed)"
+                return
+            fi
+            # Download the latest release binary for Linux
+            local arch
+            arch=$(uname -m)
+            case "$arch" in
+                aarch64) arch="linux-arm64" ;;
+                x86_64) arch="linux-x64" ;;
+                *) log_warning "Unsupported architecture: $arch. Install GCM manually: https://github.com/git-ecosystem/git-credential-manager"; return ;;
+            esac
+            # Use the stable /latest/download/ redirect — same pattern as install_lefthook, no API call needed
+            local latest_url="https://github.com/git-ecosystem/git-credential-manager/releases/latest/download/gcm-${arch}.tar.gz"
+            local tmp_dir
+            tmp_dir=$(mktemp -d)
+            curl -fsSL "$latest_url" -o "$tmp_dir/gcm.tar.gz"
+            tar -xzf "$tmp_dir/gcm.tar.gz" -C "$tmp_dir"
+            mkdir -p "$HOME/.local/bin"
+            mv "$tmp_dir/git-credential-manager" "$HOME/.local/bin/git-credential-manager"
+            chmod +x "$HOME/.local/bin/git-credential-manager"
+            rm -rf "$tmp_dir"
+            git-credential-manager configure
+            ;;
+    esac
+}
+
 # Create backup of existing config files
 backup_existing_configs() {
     log_info "Creating backup of existing configuration files..."
@@ -454,7 +584,7 @@ BACKUP_DIR="$SCRIPT_DIR"
 if [ -f "../.stow-local-ignore" ]; then
     log_info "Unstowing dotfiles packages..."
     cd ..
-    stow -D shell bash zsh git starship fzf nvim vscode 2>/dev/null || true
+    stow -D shell bash zsh git starship fzf nvim bat 2>/dev/null || true
     cd "$BACKUP_DIR"
 else
     log_warning "Not in dotfiles directory, skipping unstow step"
@@ -531,7 +661,7 @@ verify_installation() {
     done
 
     # Check if tools are available
-    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck")
+    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck" "lefthook" "git-credential-manager")
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
             log_success "$tool is available"
@@ -637,16 +767,23 @@ main() {
     detect_os
     install_package_manager
     install_core_deps
+
+    # Install all Homebrew-managed tools via Brewfile (macOS + Linux with Homebrew)
+    run_brew_bundle
+
+    # Per-tool fallbacks for Linux environments not using Homebrew
     install_starship
     install_fastfetch
     install_zoxide
     install_fzf
     install_shellcheck
+    install_lefthook
     install_neovim
     install_bat
     install_delta
     install_gitcliff
     install_direnv
+    install_gcm
 
     if [ "$skip_deploy" = true ]; then
         log_success "Dependencies installation complete! 🎉"
@@ -669,6 +806,10 @@ main() {
     fi
 
     deploy_dotfiles
+
+    log_info "Installing git hooks..."
+    lefthook install && log_success "Lefthook hooks installed"
+
     verify_installation
 
     # Rebuild bat cache for delta syntax themes

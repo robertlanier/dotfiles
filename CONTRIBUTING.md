@@ -103,8 +103,7 @@ Common scopes in this project:
 - `git` - Git configuration
 - `nvim` - Neovim configuration
 - `starship` - Starship prompt configuration
-- `vscode` - VS Code workspace settings
-- `ci` - Pre-commit hooks and CI configuration
+- `ci` - Git hooks and CI configuration
 - `install` - Installation scripts
 - `docs` - Documentation files
 

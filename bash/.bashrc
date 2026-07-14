@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # ~/.bashrc (managed by stow)
 
 # 1) shared stuff for all shells/OS

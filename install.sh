@@ -92,6 +92,44 @@ install_package_manager() {
     esac
 }
 
+# Enable EPEL and CodeReady Linux Builder on RHEL-family distros
+# Fedora has its own full package set and does not need EPEL
+enable_epel() {
+    case "$OS-$DISTRO" in
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux") ;;
+        *) return ;;
+    esac
+
+    if dnf repolist enabled 2>/dev/null | grep -q "^epel"; then
+        log_success "EPEL already enabled"
+        return
+    fi
+
+    log_info "Enabling EPEL and CodeReady Linux Builder..."
+    sudo dnf install -y dnf-plugins-core
+
+    case "$DISTRO" in
+        rhel)
+            # RHEL: epel-release is not in base repos — install directly from Fedora mirrors
+            if ! sudo dnf install -y epel-release 2>/dev/null; then
+                sudo dnf install -y \
+                    "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+            fi
+            sudo subscription-manager repos \
+                --enable "codeready-builder-for-rhel-9-$(uname -m)-rpms" 2>/dev/null \
+                || log_warning "CRB not enabled via subscription-manager — some EPEL packages may be unavailable"
+            ;;
+        centos | rocky | almalinux)
+            sudo dnf install -y epel-release
+            sudo dnf config-manager --set-enabled crb 2>/dev/null \
+                || sudo /usr/bin/crb enable 2>/dev/null \
+                || log_warning "CRB not enabled — some EPEL packages may be unavailable"
+            ;;
+    esac
+
+    log_success "EPEL enabled"
+}
+
 # Install Homebrew (macOS only)
 install_homebrew() {
     if command_exists brew; then
@@ -768,6 +806,7 @@ main() {
 
     detect_os
     install_package_manager
+    enable_epel
     install_core_deps
 
     # macOS: install all tools via Brewfile

@@ -87,12 +87,12 @@ install_package_manager() {
             PACKAGE_MANAGER="dnf"
             ;;
         "macos"*)
-            # Homebrew install is handled by install_homebrew() via run_brew_bundle
+            # Homebrew is installed by install_homebrew() via run_brew_bundle
             ;;
     esac
 }
 
-# Install Homebrew (macOS and Linux)
+# Install Homebrew (macOS only)
 install_homebrew() {
     if command_exists brew; then
         log_success "Homebrew already installed"
@@ -100,25 +100,9 @@ install_homebrew() {
     fi
 
     log_info "Installing Homebrew..."
-
-    if [ "$OS" = "linux" ]; then
-        # Homebrew on Linux requires build tools
-        log_info "Installing Homebrew build dependencies..."
-        case "$OS-$DISTRO" in
-            "linux-ubuntu" | "linux-debian")
-                sudo apt install -y build-essential procps curl file git
-                ;;
-            "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
-                sudo "$PACKAGE_MANAGER" groupinstall -y "Development Tools"
-                sudo "$PACKAGE_MANAGER" install -y procps-ng curl file git
-                ;;
-        esac
-    fi
-
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    # Add Homebrew to PATH for the current session
-    for brew_prefix in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
+    for brew_prefix in /opt/homebrew /usr/local; do
         if [ -x "${brew_prefix}/bin/brew" ]; then
             eval "$("${brew_prefix}/bin/brew" shellenv)"
             break
@@ -133,8 +117,10 @@ install_homebrew() {
     log_success "Homebrew installed"
 }
 
-# Verify Homebrew is present and run brew bundle
+# Run brew bundle — macOS only; Linux uses native package managers
 run_brew_bundle() {
+    [ "$OS" != "macos" ] && return
+
     local script_dir
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local brewfile="${script_dir}/Brewfile"
@@ -171,13 +157,13 @@ install_core_deps() {
             sudo "$PACKAGE_MANAGER" install -y git stow zsh curl wget bash-completion
             ;;
         "macos"*)
-            brew install git stow
-            # zsh is built-in on macOS
+            # git, stow, and all tools are managed by the Brewfile — nothing to do here
             ;;
     esac
 }
 
 # Install starship prompt
+# Not in Fedora or RHEL repos — use the official cross-platform installer
 install_starship() {
     if command_exists starship; then
         log_success "Starship already installed"
@@ -198,7 +184,6 @@ install_fastfetch() {
     log_info "Installing Fastfetch..."
     case "$OS-$DISTRO" in
         "linux-ubuntu" | "linux-debian")
-            # Try package first, fallback to manual install if not available
             if ! sudo apt install -y fastfetch 2>/dev/null; then
                 log_warning "Fastfetch not available in repos, skipping..."
             fi
@@ -207,10 +192,9 @@ install_fastfetch() {
             sudo dnf install -y fastfetch
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
-            log_warning "Fastfetch not available in RHEL repos, skipping..."
-            ;;
-        "macos"*)
-            brew install fastfetch
+            if ! sudo "$PACKAGE_MANAGER" install -y fastfetch 2>/dev/null; then
+                log_warning "Fastfetch not available in repos, skipping..."
+            fi
             ;;
     esac
 }
@@ -226,18 +210,13 @@ install_zoxide() {
     case "$OS-$DISTRO" in
         "linux-ubuntu" | "linux-debian")
             if ! sudo apt install -y zoxide 2>/dev/null; then
-                # Fallback to manual install
                 curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
             fi
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
             if ! sudo "$PACKAGE_MANAGER" install -y zoxide 2>/dev/null; then
-                # Fallback to manual install
                 curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
             fi
-            ;;
-        "macos"*)
-            brew install zoxide
             ;;
     esac
 }
@@ -256,9 +235,6 @@ install_fzf() {
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
             sudo "$PACKAGE_MANAGER" install -y fzf
-            ;;
-        "macos"*)
-            brew install fzf
             ;;
     esac
 }
@@ -284,41 +260,94 @@ install_shellcheck() {
                 fi
             fi
             ;;
-        "macos"*)
-            if ! brew install shellcheck 2>/dev/null; then
-                log_warning "brew install shellcheck failed, install manually: https://github.com/koalaman/shellcheck#installing"
+    esac
+}
+
+# Install shfmt (shell formatter)
+# Fedora: in default repos. RHEL: not in EPEL — download static binary.
+install_shfmt() {
+    if command_exists shfmt; then
+        log_success "shfmt already installed"
+        return
+    fi
+
+    log_info "Installing shfmt..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            if ! sudo apt install -y shfmt 2>/dev/null; then
+                _install_shfmt_binary
             fi
+            ;;
+        "linux-fedora")
+            sudo dnf install -y shfmt
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
+            _install_shfmt_binary
             ;;
     esac
 }
 
+_install_shfmt_binary() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="arm64" ;;
+        x86_64) arch="amd64" ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install shfmt manually."
+            return
+            ;;
+    esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/mvdan/sh/releases/latest" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine shfmt version. Install shfmt manually."
+        return
+    fi
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL \
+        "https://github.com/mvdan/sh/releases/download/${version}/shfmt_${version}_linux_${arch}" \
+        -o "$HOME/.local/bin/shfmt"
+    chmod +x "$HOME/.local/bin/shfmt"
+    log_success "shfmt ${version} installed to ~/.local/bin"
+}
+
 # Install lefthook (git hooks manager)
+# Not in Fedora or RHEL repos — download binary from GitHub releases
 install_lefthook() {
     if command_exists lefthook; then
         log_success "Lefthook already installed"
         return
     fi
 
+    if [ "$OS" != "linux" ]; then
+        return
+    fi
+
     log_info "Installing Lefthook..."
-    case "$OS" in
-        "macos")
-            brew install lefthook
-            ;;
-        "linux")
-            # Download the latest release binary directly — no third-party repo needed
-            local arch
-            arch=$(uname -m)
-            case "$arch" in
-                aarch64) arch="arm64" ;;
-                x86_64) ;;
-                *) log_warning "Unsupported architecture: $arch. Install lefthook manually."; return ;;
-            esac
-            local latest_url="https://github.com/evilmartians/lefthook/releases/latest/download/lefthook_Linux_${arch}"
-            mkdir -p "$HOME/.local/bin"
-            curl -fsSL "$latest_url" -o "$HOME/.local/bin/lefthook"
-            chmod +x "$HOME/.local/bin/lefthook"
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="arm64" ;;
+        x86_64) arch="x86_64" ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install lefthook manually."
+            return
             ;;
     esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/evilmartians/lefthook/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine lefthook version. Install lefthook manually."
+        return
+    fi
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL \
+        "https://github.com/evilmartians/lefthook/releases/download/v${version}/lefthook_${version}_Linux_${arch}" \
+        -o "$HOME/.local/bin/lefthook"
+    chmod +x "$HOME/.local/bin/lefthook"
 }
 
 # Install neovim
@@ -335,9 +364,6 @@ install_neovim() {
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
             sudo "$PACKAGE_MANAGER" install -y neovim
-            ;;
-        "macos"*)
-            brew install neovim
             ;;
     esac
 }
@@ -356,9 +382,6 @@ install_bat() {
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
             sudo "$PACKAGE_MANAGER" install -y bat
-            ;;
-        "macos"*)
-            brew install bat
             ;;
     esac
 }
@@ -382,73 +405,55 @@ install_delta() {
                 log_warning "Delta not in repos, install manually: https://github.com/dandavison/delta/releases"
             fi
             ;;
-        "macos"*)
-            brew install git-delta
-            ;;
     esac
-}
-
-# Ensure pip is available for tools installed via Python package index
-install_pip() {
-    if command_exists pip3 || command_exists pip; then
-        log_success "pip already installed"
-        return 0
-    fi
-
-    log_info "Installing pip..."
-    case "$OS-$DISTRO" in
-        "linux-ubuntu" | "linux-debian")
-            sudo apt install -y python3-pip
-            ;;
-        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
-            if ! sudo "$PACKAGE_MANAGER" install -y python3-pip 2>/dev/null; then
-                sudo "$PACKAGE_MANAGER" install -y python-pip 2>/dev/null || true
-            fi
-            ;;
-        "macos"*)
-            brew install python
-            ;;
-    esac
-
-    if command_exists pip3 || command_exists pip; then
-        log_success "pip installed"
-        return 0
-    fi
-
-    log_warning "pip installation failed. Python packages may not install."
-    return 1
 }
 
 # Install git-cliff (changelog generator)
+# Not in Fedora or RHEL repos — download binary from GitHub releases
 install_gitcliff() {
     if command_exists git-cliff; then
         log_success "git-cliff already installed"
         return
     fi
 
-    log_info "Installing git-cliff..."
-    # pip is the most reliable cross-platform method
-    install_pip || true
-    if command_exists pip3; then
-        pip3 install --user git-cliff
-    elif command_exists pip; then
-        pip install --user git-cliff
-    elif [ "$OS" = "macos" ]; then
-        brew install git-cliff
-    else
-        log_warning "pip not found. Install git-cliff manually: pip install --user git-cliff"
-    fi
-
-    if command_exists git-cliff; then
-        log_success "git-cliff installed"
+    if [ "$OS" != "linux" ]; then
         return
     fi
 
-    local user_bin="$HOME/.local/bin"
-    if [ -x "$user_bin/git-cliff" ]; then
-        log_warning "git-cliff installed at $user_bin/git-cliff but $user_bin is not in PATH"
-        log_info "Add this to your shell config: export PATH=\"$user_bin:\$PATH\""
+    log_info "Installing git-cliff..."
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="aarch64" ;;
+        x86_64) arch="x86_64" ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install git-cliff manually."
+            return
+            ;;
+    esac
+
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/orhun/git-cliff/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine git-cliff version. Install git-cliff manually."
+        return
     fi
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local tarball="git-cliff-${version}-${arch}-unknown-linux-musl.tar.gz"
+    curl -fsSL \
+        "https://github.com/orhun/git-cliff/releases/download/v${version}/${tarball}" \
+        -o "$tmp_dir/git-cliff.tar.gz"
+    tar -xzf "$tmp_dir/git-cliff.tar.gz" -C "$tmp_dir"
+    mkdir -p "$HOME/.local/bin"
+    local binary
+    binary=$(find "$tmp_dir" -name "git-cliff" -type f | head -1)
+    mv "$binary" "$HOME/.local/bin/git-cliff"
+    chmod +x "$HOME/.local/bin/git-cliff"
+    rm -rf "$tmp_dir"
+    log_success "git-cliff ${version} installed to ~/.local/bin"
 }
 
 # Install direnv (environment loader)
@@ -465,17 +470,14 @@ install_direnv() {
                 curl -sfL https://direnv.net/install.sh | bash
             fi
             ;;
-        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
-            if ! sudo "$PACKAGE_MANAGER" install -y direnv 2>/dev/null; then
-                log_warning "direnv not available in $PACKAGE_MANAGER repos, falling back to curl install..."
-                curl -sfL https://direnv.net/install.sh | bash
-            fi
+        "linux-fedora")
+            sudo dnf install -y direnv
             ;;
-        "macos"*)
-            brew install direnv
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
+            # direnv is not in EPEL 9 — use the official installer
+            curl -sfL https://direnv.net/install.sh | bash
             ;;
     esac
-    # Final check
     if ! command_exists direnv; then
         log_error "direnv installation failed. Please install manually."
         return 1
@@ -489,38 +491,38 @@ install_gcm() {
         return
     fi
 
+    if [ "$OS" != "linux" ]; then
+        return
+    fi
+
     log_info "Installing git-credential-manager..."
-    case "$OS" in
-        "macos")
-            brew install --cask git-credential-manager
-            ;;
-        "linux")
-            # On WSL, GCM from the Windows Git install is available via interop — no Linux binary needed.
-            if [ -n "${WSL_DISTRO_NAME}" ]; then
-                log_info "WSL detected — using Windows GCM via interop (no Linux install needed)"
-                return
-            fi
-            # Download the latest release binary for Linux
-            local arch
-            arch=$(uname -m)
-            case "$arch" in
-                aarch64) arch="linux-arm64" ;;
-                x86_64) arch="linux-x64" ;;
-                *) log_warning "Unsupported architecture: $arch. Install GCM manually: https://github.com/git-ecosystem/git-credential-manager"; return ;;
-            esac
-            # Use the stable /latest/download/ redirect — same pattern as install_lefthook, no API call needed
-            local latest_url="https://github.com/git-ecosystem/git-credential-manager/releases/latest/download/gcm-${arch}.tar.gz"
-            local tmp_dir
-            tmp_dir=$(mktemp -d)
-            curl -fsSL "$latest_url" -o "$tmp_dir/gcm.tar.gz"
-            tar -xzf "$tmp_dir/gcm.tar.gz" -C "$tmp_dir"
-            mkdir -p "$HOME/.local/bin"
-            mv "$tmp_dir/git-credential-manager" "$HOME/.local/bin/git-credential-manager"
-            chmod +x "$HOME/.local/bin/git-credential-manager"
-            rm -rf "$tmp_dir"
-            git-credential-manager configure
+
+    # On WSL, GCM from the Windows Git install is available via interop — no Linux binary needed.
+    if [ -n "${WSL_DISTRO_NAME}" ]; then
+        log_info "WSL detected — using Windows GCM via interop (no Linux install needed)"
+        return
+    fi
+
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="linux-arm64" ;;
+        x86_64) arch="linux-x64" ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install GCM manually: https://github.com/git-ecosystem/git-credential-manager"
+            return
             ;;
     esac
+    local latest_url="https://github.com/git-ecosystem/git-credential-manager/releases/latest/download/gcm-${arch}.tar.gz"
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    curl -fsSL "$latest_url" -o "$tmp_dir/gcm.tar.gz"
+    tar -xzf "$tmp_dir/gcm.tar.gz" -C "$tmp_dir"
+    mkdir -p "$HOME/.local/bin"
+    mv "$tmp_dir/git-credential-manager" "$HOME/.local/bin/git-credential-manager"
+    chmod +x "$HOME/.local/bin/git-credential-manager"
+    rm -rf "$tmp_dir"
+    git-credential-manager configure
 }
 
 # Create backup of existing config files
@@ -661,7 +663,7 @@ verify_installation() {
     done
 
     # Check if tools are available
-    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck" "lefthook" "git-credential-manager")
+    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck" "shfmt" "lefthook" "git-credential-manager")
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
             log_success "$tool is available"
@@ -768,15 +770,16 @@ main() {
     install_package_manager
     install_core_deps
 
-    # Install all Homebrew-managed tools via Brewfile (macOS + Linux with Homebrew)
+    # macOS: install all tools via Brewfile
+    # Linux: each function uses the native package manager
     run_brew_bundle
 
-    # Per-tool fallbacks for Linux environments not using Homebrew
     install_starship
     install_fastfetch
     install_zoxide
     install_fzf
     install_shellcheck
+    install_shfmt
     install_lefthook
     install_neovim
     install_bat

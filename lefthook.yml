@@ -1,7 +1,7 @@
 pre-commit:
   commands:
     check-merge-conflict:
-      run: grep -rEn "(<<<<<<< HEAD|=======|>>>>>>> )" {staged_files} && exit 1 || exit 0
+      run: grep -rEn "^(<<<<<<< |=======|>>>>>>> )" {staged_files} && exit 1 || exit 0
 
     shellcheck:
       glob: "{*.sh,shell/**/*.sh,bash/.*,zsh/.*}"

@@ -563,6 +563,70 @@ install_gcm() {
     git-credential-manager configure
 }
 
+# Install zsh plugins (autosuggestions, syntax highlighting, fzf-tab)
+# macOS: handled by Brewfile; Linux: native packages + git clone for fzf-tab
+install_zsh_plugins() {
+    if [ "$OS" = "linux" ]; then
+        log_info "Installing zsh plugins..."
+        case "$OS-$DISTRO" in
+            "linux-ubuntu" | "linux-debian")
+                sudo apt install -y zsh-autosuggestions zsh-syntax-highlighting 2>/dev/null \
+                    || log_warning "zsh plugins not available in apt repos"
+                ;;
+            "linux-fedora")
+                sudo dnf install -y zsh-autosuggestions zsh-syntax-highlighting
+                ;;
+            "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
+                sudo "$PACKAGE_MANAGER" install -y zsh-autosuggestions zsh-syntax-highlighting 2>/dev/null \
+                    || log_warning "zsh plugins not available — autosuggestions and syntax highlighting will be disabled"
+                ;;
+        esac
+    fi
+
+    # fzf-tab is not packaged for any distro — clone from GitHub
+    local fzf_tab_dir="$HOME/.config/zsh/plugins/fzf-tab"
+    if [ ! -d "$fzf_tab_dir" ]; then
+        log_info "Installing fzf-tab..."
+        mkdir -p "$(dirname "$fzf_tab_dir")"
+        git clone --depth=1 https://github.com/Aloxaf/fzf-tab "$fzf_tab_dir"
+        log_success "fzf-tab installed"
+    else
+        log_success "fzf-tab already installed"
+    fi
+}
+
+# Prompt user to set zsh as the default login shell
+configure_default_shell() {
+    local zsh_path
+    zsh_path=$(command -v zsh 2>/dev/null)
+
+    if [ -z "$zsh_path" ]; then
+        log_warning "zsh not found in PATH — skipping shell configuration"
+        return
+    fi
+
+    if [ "$SHELL" = "$zsh_path" ]; then
+        log_success "zsh is already your default shell"
+        return
+    fi
+
+    printf "\nSet zsh (%s) as your default shell? [y/N] " "$zsh_path"
+    read -r response || response="n"
+    case "$response" in
+        [yY][eE][sS] | [yY])
+            if ! grep -qF "$zsh_path" /etc/shells 2>/dev/null; then
+                log_info "Adding $zsh_path to /etc/shells..."
+                echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+            fi
+            chsh -s "$zsh_path"
+            log_success "Default shell set to zsh — restart your terminal to apply"
+            ;;
+        *)
+            log_info "Keeping current shell ($SHELL)"
+            ;;
+    esac
+}
+
 # Create backup of existing config files
 backup_existing_configs() {
     log_info "Creating backup of existing configuration files..."
@@ -826,6 +890,7 @@ main() {
     install_gitcliff
     install_direnv
     install_gcm
+    install_zsh_plugins
 
     if [ "$skip_deploy" = true ]; then
         log_success "Dependencies installation complete! 🎉"
@@ -853,6 +918,7 @@ main() {
     lefthook install && log_success "Lefthook hooks installed"
 
     verify_installation
+    configure_default_shell
 
     # Rebuild bat cache for delta syntax themes
     if command_exists bat; then

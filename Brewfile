@@ -15,6 +15,9 @@ brew "starship"
 brew "zoxide"
 brew "fzf"
 brew "direnv"
+brew "zsh-completions"
+brew "zsh-autosuggestions"
+brew "zsh-fast-syntax-highlighting"
 
 # Terminal tools
 brew "fastfetch"

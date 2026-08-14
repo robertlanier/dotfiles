@@ -1,5 +1,6 @@
 [include]
 	path = config.local
+	path = catppuccin.gitconfig
 
 [credential]
 	# Clear inherited helpers first (prevents osxkeychain stacking on macOS).
@@ -19,10 +20,10 @@
 	diffFilter = delta --color-only
 
 [delta]
+	features = catppuccin-macchiato
 	navigate = true
 	side-by-side = true
 	line-numbers = true
-	syntax-theme = Catppuccin Macchiato
 
 [color]
 	# Enable colors when supported.

@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim bat"
+PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim bat tmux"
 CONFIG_FILES=(
     ".zshrc"
     ".bashrc"
@@ -606,7 +606,10 @@ _install_yq_binary() {
     case "$arch" in
         aarch64) arch="arm64" ;;
         x86_64) arch="amd64" ;;
-        *) log_warning "Unsupported architecture: $arch. Install yq manually."; return ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install yq manually."
+            return
+            ;;
     esac
     local version
     version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
@@ -654,7 +657,10 @@ _install_glab_binary() {
     case "$arch" in
         aarch64) arch="arm64" ;;
         x86_64) arch="x86_64" ;;
-        *) log_warning "Unsupported architecture: $arch. Install glab manually."; return ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install glab manually."
+            return
+            ;;
     esac
     local version
     version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
@@ -695,6 +701,25 @@ install_tmux() {
             sudo "$PACKAGE_MANAGER" install -y tmux
             ;;
     esac
+}
+
+# Install Catppuccin theme for tmux (manual install — avoids TPM name conflict issues)
+install_tmux_theme() {
+    local plugin_dir="$HOME/.config/tmux/plugins/catppuccin/tmux"
+
+    if [ -d "$plugin_dir" ]; then
+        log_success "Catppuccin tmux theme already installed"
+        return
+    fi
+
+    if ! command_exists tmux; then
+        return
+    fi
+
+    log_info "Installing Catppuccin tmux theme..."
+    mkdir -p "$(dirname "$plugin_dir")"
+    git clone --depth=1 -b v2.3.0 https://github.com/catppuccin/tmux.git "$plugin_dir"
+    log_success "Catppuccin tmux theme installed"
 }
 
 # Install herdr (runtime for AI coding agents)
@@ -1150,6 +1175,7 @@ main() {
     install_yq
     install_glab
     install_tmux
+    install_tmux_theme
     install_herdr
     install_eza
     install_ripgrep

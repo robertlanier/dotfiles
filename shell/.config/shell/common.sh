@@ -33,6 +33,15 @@ else
     export VISUAL="${VISUAL:-vi}"
 fi
 
+# Use bat as a cat replacement when available
+# Ubuntu/Debian package the binary as batcat to avoid a naming conflict
+if command -v bat >/dev/null 2>&1; then
+    alias cat="bat"
+elif command -v batcat >/dev/null 2>&1; then
+    alias cat="batcat"
+    alias bat="batcat"
+fi
+
 # Machine-local overrides (not tracked in repo — put work/machine-specific config here)
 # shellcheck source=/dev/null
 [ -f "$XDG_CONFIG_HOME/shell/local.sh" ] && . "$XDG_CONFIG_HOME/shell/local.sh"

@@ -563,6 +563,155 @@ install_gcm() {
     git-credential-manager configure
 }
 
+# Install jq (JSON processor)
+install_jq() {
+    if command_exists jq; then
+        log_success "jq already installed"
+        return
+    fi
+
+    log_info "Installing jq..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            sudo apt install -y jq
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+            sudo "$PACKAGE_MANAGER" install -y jq
+            ;;
+    esac
+}
+
+# Install yq (YAML processor — mikefarah/yq, the Go version)
+# Ubuntu's apt yq is a Python wrapper with different syntax, so always use the binary
+install_yq() {
+    if command_exists yq; then
+        log_success "yq already installed"
+        return
+    fi
+
+    log_info "Installing yq..."
+    case "$OS-$DISTRO" in
+        "linux-fedora")
+            sudo dnf install -y yq
+            ;;
+        "linux-ubuntu" | "linux-debian" | "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
+            _install_yq_binary
+            ;;
+    esac
+}
+
+_install_yq_binary() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="arm64" ;;
+        x86_64) arch="amd64" ;;
+        *) log_warning "Unsupported architecture: $arch. Install yq manually."; return ;;
+    esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/mikefarah/yq/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine yq version. Install yq manually."
+        return
+    fi
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL \
+        "https://github.com/mikefarah/yq/releases/download/v${version}/yq_linux_${arch}" \
+        -o "$HOME/.local/bin/yq"
+    chmod +x "$HOME/.local/bin/yq"
+    log_success "yq v${version} installed to ~/.local/bin"
+}
+
+# Install glab (GitLab CLI)
+install_glab() {
+    if command_exists glab; then
+        log_success "glab already installed"
+        return
+    fi
+
+    log_info "Installing glab..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            if ! sudo apt install -y glab 2>/dev/null; then
+                _install_glab_binary
+            fi
+            ;;
+        "linux-fedora")
+            sudo dnf install -y glab
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
+            if ! sudo "$PACKAGE_MANAGER" install -y glab 2>/dev/null; then
+                _install_glab_binary
+            fi
+            ;;
+    esac
+}
+
+_install_glab_binary() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="arm64" ;;
+        x86_64) arch="x86_64" ;;
+        *) log_warning "Unsupported architecture: $arch. Install glab manually."; return ;;
+    esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://gitlab.com/gitlab-org/cli/-/releases/permalink/latest" \
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    if [ -z "$version" ]; then
+        log_warning "Could not determine glab version. Install glab manually."
+        return
+    fi
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    curl -fsSL \
+        "https://gitlab.com/gitlab-org/cli/-/releases/v${version}/downloads/glab_${version}_Linux_${arch}.tar.gz" \
+        -o "$tmp_dir/glab.tar.gz"
+    tar -xzf "$tmp_dir/glab.tar.gz" -C "$tmp_dir"
+    mkdir -p "$HOME/.local/bin"
+    local binary
+    binary=$(find "$tmp_dir" -name "glab" -type f | head -1)
+    mv "$binary" "$HOME/.local/bin/glab"
+    chmod +x "$HOME/.local/bin/glab"
+    rm -rf "$tmp_dir"
+    log_success "glab v${version} installed to ~/.local/bin"
+}
+
+# Install tmux (terminal multiplexer)
+install_tmux() {
+    if command_exists tmux; then
+        log_success "tmux already installed"
+        return
+    fi
+
+    log_info "Installing tmux..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            sudo apt install -y tmux
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+            sudo "$PACKAGE_MANAGER" install -y tmux
+            ;;
+    esac
+}
+
+# Install herdr (runtime for AI coding agents)
+install_herdr() {
+    if command_exists herdr; then
+        log_success "herdr already installed"
+        return
+    fi
+
+    if [ "$OS" != "linux" ]; then
+        return
+    fi
+
+    log_info "Installing herdr..."
+    curl -fsSL https://herdr.dev/install.sh | sh
+}
+
 # Install eza (modern ls replacement)
 # Not in EPEL 9 — fall back to GitHub binary release on RHEL-family
 install_eza() {
@@ -595,7 +744,10 @@ _install_eza_binary() {
     case "$arch" in
         aarch64) arch="aarch64" ;;
         x86_64) arch="x86_64" ;;
-        *) log_warning "Unsupported architecture: $arch. Install eza manually."; return ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install eza manually."
+            return
+            ;;
     esac
     local version
     version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
@@ -994,6 +1146,11 @@ main() {
     install_gitcliff
     install_direnv
     install_gcm
+    install_jq
+    install_yq
+    install_glab
+    install_tmux
+    install_herdr
     install_eza
     install_ripgrep
     install_fd

@@ -896,10 +896,10 @@ backup_existing_configs() {
     for config_file in "${CONFIG_FILES[@]}"; do
         local full_path="$HOME/$config_file"
 
-        if [ -e "$full_path" ]; then
+        if [ -e "$full_path" ] && [ ! -L "$full_path" ]; then
             log_info "Backing up $config_file"
             mkdir -p "$BACKUP_DIR/$(dirname "$config_file")"
-            cp -r "$full_path" "$BACKUP_DIR/$config_file"
+            mv "$full_path" "$BACKUP_DIR/$config_file"
             files_backed_up=$((files_backed_up + 1))
         fi
     done
@@ -947,7 +947,7 @@ BACKUP_DIR="$SCRIPT_DIR"
 if [ -f "../.stow-local-ignore" ]; then
     log_info "Unstowing dotfiles packages..."
     cd ..
-    stow -D shell bash zsh git starship fzf nvim bat 2>/dev/null || true
+    stow -D shell bash zsh git starship fzf nvim bat tmux 2>/dev/null || true
     cd "$BACKUP_DIR"
 else
     log_warning "Not in dotfiles directory, skipping unstow step"
@@ -994,11 +994,12 @@ deploy_dotfiles() {
         exit 1
     fi
 
-    # Deploy each package
+    # Deploy each package — use --restow (-R) so re-runs and new files in
+    # existing packages are handled correctly on non-fresh machines
     for package in $PACKAGES_TO_STOW; do
         if [ -d "$package" ]; then
             log_info "Deploying $package package..."
-            stow "$package"
+            stow -R "$package"
         else
             log_warning "Package directory '$package' not found, skipping..."
         fi

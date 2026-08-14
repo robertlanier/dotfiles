@@ -62,6 +62,51 @@ list_backups() {
     return 0
 }
 
+# Snapshot current live config before removing anything
+# Uses cp -rL to dereference symlinks so actual file content is saved,
+# not pointers back into the dotfiles repo that become useless after unstow
+snapshot_current_config() {
+    local snapshot_dir
+    snapshot_dir="$HOME/.dotfiles-snapshot-$(date +%Y%m%d-%H%M%S)"
+    local files_snapped=0
+
+    log_info "Creating pre-uninstall snapshot..."
+    mkdir -p "$snapshot_dir"
+
+    local managed=(
+        ".zshrc"
+        ".bashrc"
+        ".bash_profile"
+        ".zprofile"
+        ".config/shell"
+        ".config/zsh"
+        ".config/bash"
+        ".config/git"
+        ".config/starship.toml"
+        ".config/fzf"
+        ".config/nvim"
+        ".config/bat"
+        ".config/tmux/tmux.conf"
+    )
+
+    for rel_path in "${managed[@]}"; do
+        local full_path="$HOME/$rel_path"
+        if [ -e "$full_path" ]; then
+            mkdir -p "$snapshot_dir/$(dirname "$rel_path")"
+            cp -rL "$full_path" "$snapshot_dir/$rel_path" 2>/dev/null || true
+            files_snapped=$((files_snapped + 1))
+        fi
+    done
+
+    if [ $files_snapped -gt 0 ]; then
+        log_success "Snapshot saved to $snapshot_dir"
+        log_info "To restore manually: cp -rL \"$snapshot_dir/.\" \"\$HOME/\""
+    else
+        rmdir "$snapshot_dir" 2>/dev/null || true
+        log_warning "No managed config files found to snapshot"
+    fi
+}
+
 # Unstow all dotfiles packages
 unstow_dotfiles() {
     log_info "Removing dotfiles symlinks..."
@@ -211,6 +256,7 @@ main() {
     local auto_mode=false
     local backup_dir=""
     local skip_plugins=false
+    local skip_snapshot=false
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -226,14 +272,19 @@ main() {
                 skip_plugins=true
                 shift
                 ;;
+            --skip-snapshot)
+                skip_snapshot=true
+                shift
+                ;;
             -h | --help)
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
                 echo "Options:"
-                echo "  --auto            Use most recent backup automatically"
-                echo "  --backup DIR      Use specific backup directory"
-                echo "  --skip-plugins    Keep cloned plugins (fzf-tab, catppuccin tmux)"
-                echo "  -h, --help        Show this help message"
+                echo "  --auto             Use most recent backup automatically"
+                echo "  --backup DIR       Use specific backup directory"
+                echo "  --skip-plugins     Keep cloned plugins (fzf-tab, catppuccin tmux)"
+                echo "  --skip-snapshot    Skip pre-uninstall config snapshot"
+                echo "  -h, --help         Show this help message"
                 exit 0
                 ;;
             *)
@@ -243,6 +294,8 @@ main() {
                 ;;
         esac
     done
+
+    [ "$skip_snapshot" = false ] && snapshot_current_config
 
     unstow_dotfiles
 

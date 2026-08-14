@@ -1197,6 +1197,32 @@ main() {
     log_info "Starting dotfiles deployment..."
     echo ""
 
+    # Check for an existing backup and offer to restore before proceeding
+    local existing_backup=""
+    for _d in "$HOME"/.dotfiles-backup-* "$HOME"/.dotfiles-snapshot-*; do
+        [ -d "$_d" ] && existing_backup="$_d"
+    done
+    if [ -n "$existing_backup" ]; then
+        log_warning "Existing backup found: $existing_backup"
+        printf "Restore from this backup instead of deploying? [y/N] "
+        read -r _restore_response || _restore_response="n"
+        case "$_restore_response" in
+            [yY][eE][sS] | [yY])
+                log_info "Restoring from $existing_backup..."
+                while IFS= read -r -d '' _file; do
+                    _rel="${_file#"$existing_backup"/}"
+                    [ "$_rel" = "restore.sh" ] && continue
+                    mkdir -p "$HOME/$(dirname "$_rel")"
+                    local _target="$HOME/$_rel"
+                    [ -L "$_target" ] || [ -e "$_target" ] && rm -rf "${_target:?}"
+                    cp -r "$_file" "$HOME/$_rel"
+                done < <(find "$existing_backup" -type f -print0)
+                log_success "Restored — restart your shell: exec \$SHELL"
+                return
+                ;;
+        esac
+    fi
+
     if [ "$skip_backup" = false ]; then
         backup_existing_configs
     else

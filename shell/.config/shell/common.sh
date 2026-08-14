@@ -33,13 +33,31 @@ else
     export VISUAL="${VISUAL:-vi}"
 fi
 
-# Use bat as a cat replacement when available
-# Ubuntu/Debian package the binary as batcat to avoid a naming conflict
+# Modern CLI replacements — fall back gracefully if not installed
+# Ubuntu/Debian ship bat as batcat and fd as fdfind to avoid naming conflicts
+
 if command -v bat >/dev/null 2>&1; then
     alias cat="bat"
 elif command -v batcat >/dev/null 2>&1; then
     alias cat="batcat"
     alias bat="batcat"
+fi
+
+if command -v eza >/dev/null 2>&1; then
+    alias ls="eza"
+    alias ll="eza -l"
+    alias la="eza -la"
+fi
+
+if command -v rg >/dev/null 2>&1; then
+    alias grep="rg"
+fi
+
+if command -v fd >/dev/null 2>&1; then
+    alias find="fd"
+elif command -v fdfind >/dev/null 2>&1; then
+    alias find="fdfind"
+    alias fd="fdfind"
 fi
 
 # Machine-local overrides (not tracked in repo — put work/machine-specific config here)

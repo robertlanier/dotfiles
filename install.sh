@@ -563,6 +563,97 @@ install_gcm() {
     git-credential-manager configure
 }
 
+# Install eza (modern ls replacement)
+# Not in EPEL 9 — fall back to GitHub binary release on RHEL-family
+install_eza() {
+    if command_exists eza; then
+        log_success "eza already installed"
+        return
+    fi
+
+    log_info "Installing eza..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            if ! sudo apt install -y eza 2>/dev/null; then
+                _install_eza_binary
+            fi
+            ;;
+        "linux-fedora")
+            sudo dnf install -y eza
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
+            if ! sudo "$PACKAGE_MANAGER" install -y eza 2>/dev/null; then
+                _install_eza_binary
+            fi
+            ;;
+    esac
+}
+
+_install_eza_binary() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="aarch64" ;;
+        x86_64) arch="x86_64" ;;
+        *) log_warning "Unsupported architecture: $arch. Install eza manually."; return ;;
+    esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/eza-community/eza/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine eza version. Install eza manually."
+        return
+    fi
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    curl -fsSL \
+        "https://github.com/eza-community/eza/releases/download/v${version}/eza_${arch}-unknown-linux-musl.tar.gz" \
+        -o "$tmp_dir/eza.tar.gz"
+    tar -xzf "$tmp_dir/eza.tar.gz" -C "$tmp_dir"
+    mkdir -p "$HOME/.local/bin"
+    mv "$tmp_dir/eza" "$HOME/.local/bin/eza"
+    chmod +x "$HOME/.local/bin/eza"
+    rm -rf "$tmp_dir"
+    log_success "eza ${version} installed to ~/.local/bin"
+}
+
+# Install ripgrep (modern grep replacement)
+install_ripgrep() {
+    if command_exists rg; then
+        log_success "ripgrep already installed"
+        return
+    fi
+
+    log_info "Installing ripgrep..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            sudo apt install -y ripgrep
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+            sudo "$PACKAGE_MANAGER" install -y ripgrep
+            ;;
+    esac
+}
+
+# Install fd (modern find replacement)
+# Ubuntu/Debian package the binary as fdfind to avoid a naming conflict
+install_fd() {
+    if command_exists fd || command_exists fdfind; then
+        log_success "fd already installed"
+        return
+    fi
+
+    log_info "Installing fd..."
+    case "$OS-$DISTRO" in
+        "linux-ubuntu" | "linux-debian")
+            sudo apt install -y fd-find
+            ;;
+        "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+            sudo "$PACKAGE_MANAGER" install -y fd-find
+            ;;
+    esac
+}
+
 # Install zsh plugins (autosuggestions, syntax highlighting, fzf-tab)
 # macOS: handled by Brewfile; Linux: native packages + git clone for fzf-tab
 install_zsh_plugins() {
@@ -825,7 +916,7 @@ main() {
     # Parse command line arguments
     local skip_backup=false
     local skip_deploy=false
-    local configure_zsh=""   # empty = prompt, "true" = yes, "false" = no
+    local configure_zsh="" # empty = prompt, "true" = yes, "false" = no
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -903,6 +994,9 @@ main() {
     install_gitcliff
     install_direnv
     install_gcm
+    install_eza
+    install_ripgrep
+    install_fd
     [ "$configure_zsh" = true ] && install_zsh_plugins
 
     if [ "$skip_deploy" = true ]; then

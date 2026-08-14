@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Dotfiles uninstall script
-# Completely removes dotfiles and restores original configuration
+# Removes stow symlinks, cloned plugins, and restores original configuration
 
 set -e
 
@@ -62,14 +62,13 @@ list_backups() {
     return 0
 }
 
-# Unstow dotfiles
+# Unstow all dotfiles packages
 unstow_dotfiles() {
     log_info "Removing dotfiles symlinks..."
 
     if [ -f ".stow-local-ignore" ]; then
-        # We're in the dotfiles directory
         if command_exists stow; then
-            stow -D shell bash zsh git starship fzf nvim bat 2>/dev/null || true
+            stow -D shell bash zsh git starship fzf nvim bat tmux 2>/dev/null || true
             log_success "Dotfiles unstowed"
         else
             log_warning "Stow not found, manually removing symlinks..."
@@ -81,7 +80,7 @@ unstow_dotfiles() {
     fi
 }
 
-# Manual symlink removal
+# Manual symlink removal (fallback when stow is not available)
 manual_unstow() {
     local symlinks=(
         "$HOME/.zshrc"
@@ -89,20 +88,46 @@ manual_unstow() {
         "$HOME/.bash_profile"
         "$HOME/.zprofile"
         "$HOME/.config/shell"
-        "$HOME/.config/zsh"
-        "$HOME/.config/bash"
-        "$HOME/.config/git"
-        "$HOME/.config/starship"
+        "$HOME/.config/zsh/.zshrc"
+        "$HOME/.config/zsh/.zprofile"
+        "$HOME/.config/bash/.bashrc"
+        "$HOME/.config/bash/.bash_profile"
+        "$HOME/.config/git/config"
+        "$HOME/.config/git/ignore"
+        "$HOME/.config/git/catppuccin.gitconfig"
+        "$HOME/.config/starship.toml"
         "$HOME/.config/fzf"
         "$HOME/.config/nvim"
+        "$HOME/.config/bat/config"
+        "$HOME/.config/bat/themes"
+        "$HOME/.config/tmux/tmux.conf"
     )
 
     for symlink in "${symlinks[@]}"; do
         if [ -L "$symlink" ]; then
             rm "$symlink"
-            log_info "Removed symlink: $(basename "$symlink")"
+            log_info "Removed symlink: $symlink"
         fi
     done
+}
+
+# Remove plugins cloned by install.sh into ~/.config
+remove_cloned_plugins() {
+    log_info "Removing cloned plugins..."
+
+    local plugins=(
+        "$HOME/.config/zsh/plugins/fzf-tab"
+        "$HOME/.config/tmux/plugins/catppuccin"
+    )
+
+    for plugin_dir in "${plugins[@]}"; do
+        if [ -d "$plugin_dir" ]; then
+            rm -rf "$plugin_dir"
+            log_info "Removed plugin: $plugin_dir"
+        fi
+    done
+
+    log_success "Cloned plugins removed"
 }
 
 # Interactive backup selection
@@ -155,25 +180,20 @@ restore_backup() {
 
     local files_restored=0
 
-    # Find all files in backup (excluding restore.sh)
     while IFS= read -r -d '' file; do
         local relative_path="${file#"$backup_dir"/}"
         local target_path="$HOME/$relative_path"
 
-        # Skip restore.sh
         if [[ $relative_path == "restore.sh" ]]; then
             continue
         fi
 
-        # Create target directory if needed
         mkdir -p "$(dirname "$target_path")"
 
-        # Remove existing file/symlink
         if [ -L "$target_path" ] || [ -e "$target_path" ]; then
             rm -rf "$target_path"
         fi
 
-        # Restore backup
         cp -r "$file" "$target_path"
         log_info "Restored: $relative_path"
         files_restored=$((files_restored + 1))
@@ -188,9 +208,9 @@ main() {
     echo "============================="
     echo ""
 
-    # Parse arguments
     local auto_mode=false
     local backup_dir=""
+    local skip_plugins=false
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -202,13 +222,18 @@ main() {
                 backup_dir="$2"
                 shift 2
                 ;;
+            --skip-plugins)
+                skip_plugins=true
+                shift
+                ;;
             -h | --help)
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
                 echo "Options:"
-                echo "  --auto          Use most recent backup automatically"
-                echo "  --backup DIR    Use specific backup directory"
-                echo "  -h, --help      Show this help message"
+                echo "  --auto            Use most recent backup automatically"
+                echo "  --backup DIR      Use specific backup directory"
+                echo "  --skip-plugins    Keep cloned plugins (fzf-tab, catppuccin tmux)"
+                echo "  -h, --help        Show this help message"
                 exit 0
                 ;;
             *)
@@ -220,6 +245,10 @@ main() {
     done
 
     unstow_dotfiles
+
+    if [ "$skip_plugins" = false ]; then
+        remove_cloned_plugins
+    fi
 
     if [ "$auto_mode" = true ]; then
         backup_dir=$(find_backup)

@@ -79,7 +79,7 @@ WORDCHARS='*?_[]~=&;!#$%^(){}'
 
 # ------------- Navigation & Fuzzy -------------
 if command -v zoxide &>/dev/null; then
-    eval "$(zoxide init zsh)"
+    eval "$(zoxide init zsh --cmd cd)"
 fi
 
 # FZF shell integration — XDG path first, then built-in (fzf >= 0.48), then fallbacks

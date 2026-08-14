@@ -610,21 +610,12 @@ configure_default_shell() {
         return
     fi
 
-    printf "\nSet zsh (%s) as your default shell? [y/N] " "$zsh_path"
-    read -r response || response="n"
-    case "$response" in
-        [yY][eE][sS] | [yY])
-            if ! grep -qF "$zsh_path" /etc/shells 2>/dev/null; then
-                log_info "Adding $zsh_path to /etc/shells..."
-                echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
-            fi
-            chsh -s "$zsh_path"
-            log_success "Default shell set to zsh — restart your terminal to apply"
-            ;;
-        *)
-            log_info "Keeping current shell ($SHELL)"
-            ;;
-    esac
+    if ! grep -qF "$zsh_path" /etc/shells 2>/dev/null; then
+        log_info "Adding $zsh_path to /etc/shells..."
+        echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+    fi
+    chsh -s "$zsh_path"
+    log_success "Default shell set to zsh — restart your terminal to apply"
 }
 
 # Create backup of existing config files
@@ -834,6 +825,7 @@ main() {
     # Parse command line arguments
     local skip_backup=false
     local skip_deploy=false
+    local configure_zsh=""   # empty = prompt, "true" = yes, "false" = no
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -850,6 +842,14 @@ main() {
                 skip_deploy=true
                 shift
                 ;;
+            --zsh)
+                configure_zsh=true
+                shift
+                ;;
+            --no-zsh)
+                configure_zsh=false
+                shift
+                ;;
             -h | --help)
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
@@ -857,6 +857,8 @@ main() {
                 echo "  --deps-only     Install dependencies only, no config changes"
                 echo "  --skip-backup   Skip backing up existing config files"
                 echo "  --skip-deploy   Skip deploying dotfiles (backup and install deps only)"
+                echo "  --zsh           Configure zsh as default shell (non-interactive)"
+                echo "  --no-zsh        Skip zsh plugins and shell switch (non-interactive)"
                 echo "  -h, --help      Show this help message"
                 exit 0
                 ;;
@@ -870,6 +872,17 @@ main() {
 
     detect_os
     install_package_manager
+
+    # Ask about zsh once, upfront, before any installation begins
+    if [ -z "$configure_zsh" ]; then
+        printf "Configure zsh as your default shell? [Y/n] "
+        read -r _zsh_response || _zsh_response="y"
+        case "$_zsh_response" in
+            [nN][oO] | [nN]) configure_zsh=false ;;
+            *) configure_zsh=true ;;
+        esac
+    fi
+
     enable_epel
     install_core_deps
 
@@ -890,7 +903,7 @@ main() {
     install_gitcliff
     install_direnv
     install_gcm
-    install_zsh_plugins
+    [ "$configure_zsh" = true ] && install_zsh_plugins
 
     if [ "$skip_deploy" = true ]; then
         log_success "Dependencies installation complete! 🎉"
@@ -918,7 +931,7 @@ main() {
     lefthook install && log_success "Lefthook hooks installed"
 
     verify_installation
-    configure_default_shell
+    [ "$configure_zsh" = true ] && configure_default_shell
 
     # Rebuild bat cache for delta syntax themes
     if command_exists bat; then

@@ -1007,39 +1007,16 @@ deploy_dotfiles() {
 # does not conflict when it creates the new ~/. symlinks.
 migrate_git_config() {
     local old_dir="$HOME/.config/git"
-    local migrated=0
 
+    # Stow linked the whole directory; remove it so the new ~/. symlinks can be created
     if [ -L "$old_dir" ]; then
-        # The entire directory was a stow-managed symlink (old layout) — remove it
         log_info "Removing old git directory symlink: $old_dir"
         rm "$old_dir"
-        migrated=$((migrated + 1))
-    else
-        for f in config ignore catppuccin.gitconfig; do
-            local path="$old_dir/$f"
-            if [ -L "$path" ]; then
-                log_info "Removing old git symlink: $path"
-                rm "$path"
-                migrated=$((migrated + 1))
-            elif [ -f "$path" ]; then
-                log_warning "$path is a real file (not a symlink) — backing up to ${path}.bak"
-                mv "$path" "${path}.bak"
-                migrated=$((migrated + 1))
-            fi
-        done
-
-        # Remove the directory only if now empty
-        if [ -d "$old_dir" ] && [ -z "$(ls -A "$old_dir")" ]; then
-            rmdir "$old_dir"
-        fi
-    fi
-
-    # Ensure ~/.config/git/ exists so the config.local include resolves
-    mkdir -p "$old_dir"
-
-    if [ $migrated -gt 0 ]; then
         log_success "Git config migration complete"
     fi
+
+    # Ensure the directory exists so the config.local include in .gitconfig resolves
+    mkdir -p "$old_dir"
 }
 
 # Verify installation

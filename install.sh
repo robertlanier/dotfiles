@@ -1222,11 +1222,12 @@ main() {
 
     deploy_dotfiles
 
+    [ "$configure_zsh" = true ] && configure_default_shell
+
     log_info "Installing git hooks..."
     lefthook install && log_success "Lefthook hooks installed"
 
-    verify_installation
-    [ "$configure_zsh" = true ] && configure_default_shell
+    verify_installation || true
 
     # Rebuild bat cache for delta syntax themes
     if command_exists bat; then

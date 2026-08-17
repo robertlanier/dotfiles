@@ -30,6 +30,7 @@ CONFIG_FILES=(
     ".config/shell"
     ".config/fzf"
     ".config/bat"
+    ".config/tmux"
 )
 
 # Logging functions
@@ -1009,23 +1010,33 @@ migrate_git_config() {
     local old_dir="$HOME/.config/git"
     local migrated=0
 
-    for f in config ignore catppuccin.gitconfig; do
-        local path="$old_dir/$f"
-        if [ -L "$path" ]; then
-            log_info "Removing old git symlink: $path"
-            rm "$path"
-            migrated=$((migrated + 1))
-        elif [ -f "$path" ]; then
-            log_warning "$path is a real file (not a symlink) — backing up to ${path}.bak"
-            mv "$path" "${path}.bak"
-            migrated=$((migrated + 1))
-        fi
-    done
+    if [ -L "$old_dir" ]; then
+        # The entire directory was a stow-managed symlink (old layout) — remove it
+        log_info "Removing old git directory symlink: $old_dir"
+        rm "$old_dir"
+        migrated=$((migrated + 1))
+    else
+        for f in config ignore catppuccin.gitconfig; do
+            local path="$old_dir/$f"
+            if [ -L "$path" ]; then
+                log_info "Removing old git symlink: $path"
+                rm "$path"
+                migrated=$((migrated + 1))
+            elif [ -f "$path" ]; then
+                log_warning "$path is a real file (not a symlink) — backing up to ${path}.bak"
+                mv "$path" "${path}.bak"
+                migrated=$((migrated + 1))
+            fi
+        done
 
-    # Remove the directory only if now empty
-    if [ -d "$old_dir" ] && [ -z "$(ls -A "$old_dir")" ]; then
-        rmdir "$old_dir"
+        # Remove the directory only if now empty
+        if [ -d "$old_dir" ] && [ -z "$(ls -A "$old_dir")" ]; then
+            rmdir "$old_dir"
+        fi
     fi
+
+    # Ensure ~/.config/git/ exists so the config.local include resolves
+    mkdir -p "$old_dir"
 
     [ $migrated -gt 0 ] && log_success "Git config migration complete"
 }
@@ -1286,13 +1297,14 @@ main() {
         esac
     fi
 
+    migrate_git_config
+
     if [ "$skip_backup" = false ]; then
         backup_existing_configs
     else
         log_warning "Skipping backup (--skip-backup specified)"
     fi
 
-    migrate_git_config
     deploy_dotfiles
 
     [ "$configure_zsh" = true ] && configure_default_shell

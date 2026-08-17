@@ -529,17 +529,8 @@ install_gcm() {
         return
     fi
 
-    if [ "$OS" != "linux" ]; then
-        return
-    fi
-
-    log_info "Installing git-credential-manager..."
-
-    # On WSL, GCM from the Windows Git install is available via interop — no Linux binary needed.
-    if [ -n "${WSL_DISTRO_NAME}" ]; then
-        log_info "WSL detected — using Windows GCM via interop (no Linux install needed)"
-        return
-    fi
+    # GCM is only needed for HTTPS git remotes — not needed since SSH is used for all git remotes.
+    [ "$OS" != "macos" ] && return
 
     local arch
     arch=$(uname -m)

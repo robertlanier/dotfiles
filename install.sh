@@ -869,6 +869,18 @@ configure_default_shell() {
         return
     fi
 
+    if ! command_exists chsh; then
+        log_info "chsh not found — installing util-linux-user..."
+        case "$OS-$DISTRO" in
+            "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
+                sudo "$PACKAGE_MANAGER" install -y util-linux-user
+                ;;
+            "linux-ubuntu" | "linux-debian")
+                sudo apt install -y passwd
+                ;;
+        esac
+    fi
+
     if ! grep -qF "$zsh_path" /etc/shells 2>/dev/null; then
         log_info "Adding $zsh_path to /etc/shells..."
         echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null

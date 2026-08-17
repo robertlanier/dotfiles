@@ -40,6 +40,4 @@ brew "shellcheck"
 brew "shfmt"
 
 # Credentials
-on_macos do
-  cask "git-credential-manager"
-end
+cask "git-credential-manager"

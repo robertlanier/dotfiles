@@ -1077,6 +1077,35 @@ verify_installation() {
 }
 
 # Main installation function
+# Remove old backup directories, keeping the newest N
+cleanup_backups() {
+    local keep="${1:-3}"
+    local backup_dirs
+    mapfile -t backup_dirs < <(find "$HOME" -maxdepth 1 -type d -name ".dotfiles-backup-*" | sort -r)
+
+    if [ ${#backup_dirs[@]} -eq 0 ]; then
+        log_success "No backup directories found — nothing to clean up"
+        return
+    fi
+
+    log_info "Found ${#backup_dirs[@]} backup director$([ ${#backup_dirs[@]} -eq 1 ] && echo y || echo ies)"
+
+    local removed=0
+    for i in "${!backup_dirs[@]}"; do
+        if [ "$i" -ge "$keep" ]; then
+            log_info "Removing old backup: ${backup_dirs[$i]}"
+            rm -rf "${backup_dirs[$i]}"
+            removed=$((removed + 1))
+        fi
+    done
+
+    if [ $removed -eq 0 ]; then
+        log_success "Nothing to remove — only ${#backup_dirs[@]} backup(s) exist (keeping $keep)"
+    else
+        log_success "Removed $removed old backup director$([ $removed -eq 1 ] && echo y || echo ies), kept newest $keep"
+    fi
+}
+
 main() {
     echo "🧩 Dotfiles Installation Script"
     echo "================================"
@@ -1086,9 +1115,14 @@ main() {
     local skip_backup=false
     local skip_deploy=false
     local configure_zsh="" # empty = prompt, "true" = yes, "false" = no
+    local do_cleanup=false
 
     while [[ $# -gt 0 ]]; do
         case $1 in
+            --cleanup)
+                do_cleanup=true
+                shift
+                ;;
             --skip-backup)
                 skip_backup=true
                 shift
@@ -1114,6 +1148,7 @@ main() {
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
                 echo "Options:"
+                echo "  --cleanup       Remove old dotfiles backup directories (keep newest 3)"
                 echo "  --deps-only     Install dependencies only, no config changes"
                 echo "  --skip-backup   Skip backing up existing config files"
                 echo "  --skip-deploy   Skip deploying dotfiles (backup and install deps only)"
@@ -1130,17 +1165,29 @@ main() {
         esac
     done
 
+    if [ "$do_cleanup" = true ]; then
+        cleanup_backups 3
+        exit 0
+    fi
+
     detect_os
     install_package_manager
 
-    # Ask about zsh once, upfront, before any installation begins
+    # Ask about zsh once, upfront — skip if it's already the default shell
     if [ -z "$configure_zsh" ]; then
-        printf "Configure zsh as your default shell? [Y/n] "
-        read -r _zsh_response || _zsh_response="y"
-        case "$_zsh_response" in
-            [nN][oO] | [nN]) configure_zsh=false ;;
-            *) configure_zsh=true ;;
-        esac
+        local zsh_path
+        zsh_path=$(command -v zsh 2>/dev/null)
+        if [ -n "$zsh_path" ] && [ "$SHELL" = "$zsh_path" ]; then
+            configure_zsh=false
+            log_success "zsh is already your default shell — skipping"
+        else
+            printf "Configure zsh as your default shell? [Y/n] "
+            read -r _zsh_response || _zsh_response="y"
+            case "$_zsh_response" in
+                [nN][oO] | [nN]) configure_zsh=false ;;
+                *) configure_zsh=true ;;
+            esac
+        fi
     fi
 
     enable_epel

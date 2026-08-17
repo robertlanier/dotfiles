@@ -25,6 +25,7 @@ fi
 if [ -n "$BREW_PREFIX" ]; then
     FPATH="$BREW_PREFIX/share/zsh-completions:$FPATH"
 fi
+mkdir -p "$XDG_CACHE_HOME/zsh"
 autoload -Uz compinit
 compinit -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 zmodload zsh/complist

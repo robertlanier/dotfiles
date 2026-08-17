@@ -529,29 +529,9 @@ install_gcm() {
         return
     fi
 
-    # GCM is only needed for HTTPS git remotes — not needed since SSH is used for all git remotes.
-    [ "$OS" != "macos" ] && return
-
-    local arch
-    arch=$(uname -m)
-    case "$arch" in
-        aarch64) arch="linux-arm64" ;;
-        x86_64) arch="linux-x64" ;;
-        *)
-            log_warning "Unsupported architecture: $arch. Install GCM manually: https://github.com/git-ecosystem/git-credential-manager"
-            return
-            ;;
-    esac
-    local latest_url="https://github.com/git-ecosystem/git-credential-manager/releases/latest/download/gcm-${arch}.tar.gz"
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-    curl -fsSL "$latest_url" -o "$tmp_dir/gcm.tar.gz"
-    tar -xzf "$tmp_dir/gcm.tar.gz" -C "$tmp_dir"
-    mkdir -p "$HOME/.local/bin"
-    mv "$tmp_dir/git-credential-manager" "$HOME/.local/bin/git-credential-manager"
-    chmod +x "$HOME/.local/bin/git-credential-manager"
-    rm -rf "$tmp_dir"
-    git-credential-manager configure
+    # macOS: GCM is managed by the Brewfile (cask "git-credential-manager") — nothing to do here.
+    # Linux: SSH is used for all remotes, so GCM is not needed.
+    return
 }
 
 # Install jq (JSON processor)

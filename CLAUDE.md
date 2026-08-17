@@ -24,7 +24,7 @@ GNU Stow-based dotfiles with layered shell config, XDG compliance, and cross-pla
 | `shell` | Cross-platform shell config and OS overlays |
 | `bash` | Bash dispatcher + `~/.config/bash/` |
 | `zsh` | Zsh dispatcher + `~/.config/zsh/` + plugins |
-| `git` | `~/.config/git/config` |
+| `git` | `~/.gitconfig`, `~/.gitignore_global`, `~/.catppuccin.gitconfig` |
 | `nvim` | `~/.config/nvim/` |
 | `starship` | `~/.config/starship.toml` |
 | `fzf` | `~/.config/fzf/` themes |

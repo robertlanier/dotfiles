@@ -1001,6 +1001,34 @@ deploy_dotfiles() {
     log_success "All dotfiles packages deployed successfully!"
 }
 
+# Migrate old XDG git config to ~/.gitconfig layout
+# Removes stow-managed symlinks from the old ~/.config/git/ location so stow -R
+# does not conflict when it creates the new ~/. symlinks.
+migrate_git_config() {
+    local old_dir="$HOME/.config/git"
+    local migrated=0
+
+    for f in config ignore catppuccin.gitconfig; do
+        local path="$old_dir/$f"
+        if [ -L "$path" ]; then
+            log_info "Removing old git symlink: $path"
+            rm "$path"
+            migrated=$((migrated + 1))
+        elif [ -f "$path" ]; then
+            log_warning "$path is a real file (not a symlink) — backing up to ${path}.bak"
+            mv "$path" "${path}.bak"
+            migrated=$((migrated + 1))
+        fi
+    done
+
+    # Remove the directory only if now empty
+    if [ -d "$old_dir" ] && [ -z "$(ls -A "$old_dir")" ]; then
+        rmdir "$old_dir"
+    fi
+
+    [ $migrated -gt 0 ] && log_success "Git config migration complete"
+}
+
 # Verify installation
 verify_installation() {
     log_info "Verifying installation..."
@@ -1263,6 +1291,7 @@ main() {
         log_warning "Skipping backup (--skip-backup specified)"
     fi
 
+    migrate_git_config
     deploy_dotfiles
 
     [ "$configure_zsh" = true ] && configure_default_shell

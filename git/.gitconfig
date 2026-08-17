@@ -1,6 +1,6 @@
 [include]
-	path = config.local
-	path = catppuccin.gitconfig
+	path = ~/.config/git/config.local
+	path = ~/.catppuccin.gitconfig
 
 [credential]
 	# Clear inherited helpers first (prevents osxkeychain stacking on macOS).
@@ -15,7 +15,7 @@
 [core]
 	autocrlf = input
 	pager = delta
-	excludesfile = ~/.config/git/ignore
+	excludesfile = ~/.gitignore_global
 
 [interactive]
 	diffFilter = delta --color-only

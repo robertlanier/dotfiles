@@ -1,4 +1,7 @@
 # shellcheck shell=bash
+# Hand off to zsh for interactive sessions (chsh unavailable on domain accounts)
+[ -t 1 ] && command -v zsh >/dev/null && exec zsh
+
 # Enable direnv if installed
 if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv hook bash)"

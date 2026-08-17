@@ -890,12 +890,12 @@ configure_default_shell() {
         log_success "Default shell set to zsh — restart your terminal to apply"
     else
         # chsh fails on domain/AD accounts — fall back to exec zsh in .bash_profile
-        log_warning "chsh failed (likely a domain account) — adding 'exec zsh' to ~/.bash_profile instead"
-        local bash_profile="$HOME/.bash_profile"
-        if ! grep -q "exec zsh" "$bash_profile" 2>/dev/null; then
-            printf '\n# Launch zsh for interactive sessions (chsh unavailable on domain accounts)\n[ -t 1 ] && command -v zsh >/dev/null && exec zsh\n' >> "$bash_profile"
+        log_warning "chsh failed (likely a domain account) — adding 'exec zsh' to ~/.bashrc instead"
+        local bashrc="$HOME/.bashrc"
+        if ! grep -q "exec zsh" "$bashrc" 2>/dev/null; then
+            printf '\n# Launch zsh for interactive sessions (chsh unavailable on domain accounts)\n[ -t 1 ] && command -v zsh >/dev/null && exec zsh\n' >> "$bashrc"
         fi
-        log_success "Added 'exec zsh' to ~/.bash_profile — restart your terminal to apply"
+        log_success "Added 'exec zsh' to ~/.bashrc — restart your terminal to apply"
     fi
 }
 

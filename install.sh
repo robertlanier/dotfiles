@@ -519,8 +519,7 @@ install_direnv() {
             ;;
     esac
     if ! command_exists direnv; then
-        log_error "direnv installation failed. Please install manually."
-        return 1
+        log_warning "direnv installation failed — install manually: https://direnv.net"
     fi
 }
 
@@ -1038,7 +1037,9 @@ migrate_git_config() {
     # Ensure ~/.config/git/ exists so the config.local include resolves
     mkdir -p "$old_dir"
 
-    [ $migrated -gt 0 ] && log_success "Git config migration complete"
+    if [ $migrated -gt 0 ]; then
+        log_success "Git config migration complete"
+    fi
 }
 
 # Verify installation

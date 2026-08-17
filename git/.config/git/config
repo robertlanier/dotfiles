@@ -9,12 +9,13 @@
 	helper = manager
 
 [credential "https://dev.azure.com"]
-	# Azure DevOps can require different creds per org/project URL path.
 	useHttpPath = true
+	# Azure DevOps can require different creds per org/project URL path.
 
 [core]
 	autocrlf = input
 	pager = delta
+	excludesfile = ~/.config/git/ignore
 
 [interactive]
 	diffFilter = delta --color-only

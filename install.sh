@@ -1038,7 +1038,7 @@ verify_installation() {
     done
 
     # Check if tools are available
-    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck" "shfmt" "lefthook" "git-credential-manager")
+    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck" "shfmt" "lefthook")
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
             log_success "$tool is available"
@@ -1072,20 +1072,14 @@ verify_installation() {
         issues=$((issues + 1))
     fi
 
-    # Check delta theme configuration
+    # Check delta theme — theme is set via features = catppuccin-macchiato, not delta.syntax-theme directly
     if command_exists delta; then
-        local delta_theme=""
-        if [ -f "$xdg_config_home/git/config" ]; then
-            delta_theme="$(git config --file "$xdg_config_home/git/config" --get delta.syntax-theme 2>/dev/null || true)"
-        fi
-        if [ -z "$delta_theme" ]; then
-            delta_theme="$(git config --global --get delta.syntax-theme 2>/dev/null || true)"
-        fi
-
-        if [ "$delta_theme" = "Catppuccin Macchiato" ]; then
+        local delta_features=""
+        delta_features="$(git config --global --get delta.features 2>/dev/null || true)"
+        if [[ "$delta_features" == *"catppuccin-macchiato"* ]]; then
             log_success "delta is configured with Catppuccin Macchiato"
         else
-            log_warning "delta theme is not set to Catppuccin Macchiato"
+            log_warning "delta Catppuccin Macchiato feature not set (delta.features = $delta_features)"
             issues=$((issues + 1))
         fi
     fi

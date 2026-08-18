@@ -523,18 +523,6 @@ install_direnv() {
     fi
 }
 
-# Install git-credential-manager (GCM)
-install_gcm() {
-    if command_exists git-credential-manager; then
-        log_success "git-credential-manager already installed"
-        return
-    fi
-
-    # macOS: GCM is managed by the Brewfile (cask "git-credential-manager") — nothing to do here.
-    # Linux: SSH is used for all remotes, so GCM is not needed.
-    return
-}
-
 # Install jq (JSON processor)
 install_jq() {
     if command_exists jq; then
@@ -903,80 +891,9 @@ backup_existing_configs() {
         rmdir "$BACKUP_DIR" 2>/dev/null || true
     else
         log_success "Backed up $files_backed_up config files to $BACKUP_DIR"
-
-        # Create restore script
-        create_restore_script
     fi
 }
 
-# Create restore script
-create_restore_script() {
-    local restore_script="$BACKUP_DIR/restore.sh"
-
-    cat >"$restore_script" <<'EOF'
-#!/bin/bash
-# Restore script - reverts dotfiles installation
-
-set -e
-
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
-
-echo "🔄 Dotfiles Restore Script"
-echo "=========================="
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="$SCRIPT_DIR"
-
-# Check if we're in dotfiles directory and unstow packages
-if [ -f "../.stow-local-ignore" ]; then
-    log_info "Unstowing dotfiles packages..."
-    cd ..
-    stow -D shell bash zsh git starship fzf nvim bat tmux 2>/dev/null || true
-    cd "$BACKUP_DIR"
-else
-    log_warning "Not in dotfiles directory, skipping unstow step"
-fi
-
-# Restore backed up files
-log_info "Restoring backed up configuration files..."
-files_restored=0
-
-while IFS= read -r -d '' file; do
-    relative_path="${file#$BACKUP_DIR/}"
-    target_path="$HOME/$relative_path"
-
-    # Remove existing symlink/file
-    if [ -L "$target_path" ] || [ -e "$target_path" ]; then
-        rm -rf "$target_path"
-    fi
-
-    # Restore backup
-    mkdir -p "$(dirname "$target_path")"
-    cp -r "$file" "$target_path"
-    log_info "Restored $relative_path"
-    files_restored=$((files_restored + 1))
-done < <(find "$BACKUP_DIR" -type f -not -name "restore.sh" -print0)
-
-log_success "Restored $files_restored configuration files"
-echo ""
-log_success "Dotfiles have been successfully reverted! 🎉"
-log_info "Your original configuration has been restored."
-log_info "You may want to restart your shell: exec \$SHELL"
-EOF
-
-    chmod +x "$restore_script"
-    log_success "Created restore script at $restore_script"
-}
 
 # Deploy dotfiles using stow
 deploy_dotfiles() {
@@ -1019,106 +936,6 @@ migrate_git_config() {
     mkdir -p "$old_dir"
 }
 
-# Verify installation
-verify_installation() {
-    log_info "Verifying installation..."
-
-    local issues=0
-
-    # Check if dotfiles are properly linked
-    for config_file in ".zshrc" ".bashrc"; do
-        if [ -L "$HOME/$config_file" ] && [ -e "$HOME/$config_file" ]; then
-            log_success "$config_file is properly linked"
-        elif [ -e "$HOME/$config_file" ]; then
-            log_warning "$config_file exists but is not a symlink"
-            issues=$((issues + 1))
-        fi
-    done
-
-    # Check if tools are available
-    local tools=("starship" "zoxide" "fzf" "nvim" "bat" "delta" "git-cliff" "direnv" "shellcheck" "shfmt" "lefthook")
-    for tool in "${tools[@]}"; do
-        if command_exists "$tool"; then
-            log_success "$tool is available"
-        else
-            log_warning "$tool is not in PATH"
-            issues=$((issues + 1))
-        fi
-    done
-
-    # Check Catppuccin themes used by shell configs
-    local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-
-    if [ -f "$xdg_config_home/fzf/themes/catppuccin/themes/catppuccin-fzf-macchiato.sh" ]; then
-        log_success "Catppuccin fzf theme is installed"
-    else
-        log_warning "Catppuccin fzf theme not found"
-        issues=$((issues + 1))
-    fi
-
-    if [ -f "$xdg_config_home/bat/themes/Catppuccin Macchiato.tmTheme" ]; then
-        log_success "Catppuccin bat theme is installed"
-    else
-        log_warning "Catppuccin bat theme not found"
-        issues=$((issues + 1))
-    fi
-
-    if [ -f "$xdg_config_home/bat/config" ] && grep -q 'Catppuccin Macchiato' "$xdg_config_home/bat/config"; then
-        log_success "bat config uses Catppuccin Macchiato"
-    else
-        log_warning "bat config is missing Catppuccin Macchiato theme"
-        issues=$((issues + 1))
-    fi
-
-    # Check delta theme — theme is set via features = catppuccin-macchiato, not delta.syntax-theme directly
-    if command_exists delta; then
-        local delta_features=""
-        delta_features="$(git config --global --get delta.features 2>/dev/null || true)"
-        if [[ "$delta_features" == *"catppuccin-macchiato"* ]]; then
-            log_success "delta is configured with Catppuccin Macchiato"
-        else
-            log_warning "delta Catppuccin Macchiato feature not set (delta.features = $delta_features)"
-            issues=$((issues + 1))
-        fi
-    fi
-
-    if [ $issues -eq 0 ]; then
-        log_success "Installation verification passed!"
-    else
-        log_warning "Installation verification found $issues issues (see above)"
-        return 1
-    fi
-}
-
-# Main installation function
-# Remove old backup directories, keeping the newest N
-cleanup_backups() {
-    local keep="${1:-3}"
-    local backup_dirs
-    mapfile -t backup_dirs < <(find "$HOME" -maxdepth 1 -type d -name ".dotfiles-backup-*" | sort -r)
-
-    if [ ${#backup_dirs[@]} -eq 0 ]; then
-        log_success "No backup directories found — nothing to clean up"
-        return
-    fi
-
-    log_info "Found ${#backup_dirs[@]} backup director$([ ${#backup_dirs[@]} -eq 1 ] && echo y || echo ies)"
-
-    local removed=0
-    for i in "${!backup_dirs[@]}"; do
-        if [ "$i" -ge "$keep" ]; then
-            log_info "Removing old backup: ${backup_dirs[$i]}"
-            rm -rf "${backup_dirs[$i]}"
-            removed=$((removed + 1))
-        fi
-    done
-
-    if [ $removed -eq 0 ]; then
-        log_success "Nothing to remove — only ${#backup_dirs[@]} backup(s) exist (keeping $keep)"
-    else
-        log_success "Removed $removed old backup director$([ $removed -eq 1 ] && echo y || echo ies), kept newest $keep"
-    fi
-}
 
 main() {
     echo "🧩 Dotfiles Installation Script"
@@ -1129,14 +946,9 @@ main() {
     local skip_backup=false
     local skip_deploy=false
     local configure_zsh="" # empty = prompt, "true" = yes, "false" = no
-    local do_cleanup=false
 
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --cleanup)
-                do_cleanup=true
-                shift
-                ;;
             --skip-backup)
                 skip_backup=true
                 shift
@@ -1162,7 +974,6 @@ main() {
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
                 echo "Options:"
-                echo "  --cleanup       Remove old dotfiles backup directories (keep newest 3)"
                 echo "  --deps-only     Install dependencies only, no config changes"
                 echo "  --skip-backup   Skip backing up existing config files"
                 echo "  --skip-deploy   Skip deploying dotfiles (backup and install deps only)"
@@ -1178,11 +989,6 @@ main() {
                 ;;
         esac
     done
-
-    if [ "$do_cleanup" = true ]; then
-        cleanup_backups 3
-        exit 0
-    fi
 
     detect_os
     install_package_manager
@@ -1211,29 +1017,30 @@ main() {
     # Linux: each function uses the native package manager
     run_brew_bundle
 
-    install_starship
-    install_fastfetch
-    install_zoxide
-    install_fzf
-    install_shellcheck
-    install_shfmt
-    install_lefthook
-    install_neovim
-    install_bat
-    install_delta
-    install_gitcliff
-    install_direnv
-    install_gcm
-    install_jq
-    install_yq
-    install_glab
-    install_tmux
+    if [ "$OS" = "linux" ]; then
+        install_starship
+        install_fastfetch
+        install_zoxide
+        install_fzf
+        install_shellcheck
+        install_shfmt
+        install_lefthook
+        install_neovim
+        install_bat
+        install_delta
+        install_gitcliff
+        install_direnv
+        install_jq
+        install_yq
+        install_glab
+        install_tmux
+        install_herdr
+        install_eza
+        install_ripgrep
+        install_fd
+        [ "$configure_zsh" = true ] && install_zsh_plugins
+    fi
     install_tmux_theme
-    install_herdr
-    install_eza
-    install_ripgrep
-    install_fd
-    [ "$configure_zsh" = true ] && install_zsh_plugins
 
     if [ "$skip_deploy" = true ]; then
         log_success "Dependencies installation complete! 🎉"
@@ -1290,8 +1097,6 @@ main() {
     log_info "Installing git hooks..."
     lefthook install && log_success "Lefthook hooks installed"
 
-    verify_installation || true
-
     # Rebuild bat cache for delta syntax themes
     if command_exists bat; then
         log_info "Rebuilding bat cache for delta themes..."
@@ -1299,27 +1104,12 @@ main() {
     fi
 
     echo ""
-    log_success "Installation complete! 🎉"
+    log_success "Installation complete!"
+    if [ -d "$BACKUP_DIR" ]; then
+        log_info "Backup at: $BACKUP_DIR"
+    fi
     echo ""
-
-    if [ -d "$BACKUP_DIR" ]; then
-        echo "📁 Backup Information:"
-        echo "   Location: $BACKUP_DIR"
-        echo "   Restore:  $BACKUP_DIR/restore.sh"
-        echo ""
-    fi
-
-    echo "🚀 Next Steps:"
-    echo '1. Restart your shell: exec $SHELL'
-    echo "2. Enjoy your new dotfiles setup!"
-    echo "3. Runtime checks:"
-    echo "   - complete -p git"
-    echo "   - git config --get delta.syntax-theme"
-    echo "   - bat --list-themes | rg Catppuccin"
-
-    if [ -d "$BACKUP_DIR" ]; then
-        echo "4. If something breaks, run: $BACKUP_DIR/restore.sh"
-    fi
+    echo "Restart your shell: exec \$SHELL"
 }
 
 # Run main function

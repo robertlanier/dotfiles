@@ -13,6 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 PACKAGES_TO_STOW="shell bash zsh git starship fzf nvim bat tmux"
 CONFIG_FILES=(
@@ -161,9 +162,7 @@ install_homebrew() {
 run_brew_bundle() {
     [ "$OS" != "macos" ] && return
 
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local brewfile="${script_dir}/Brewfile"
+    local brewfile="${SCRIPT_DIR}/Brewfile"
 
     if [ ! -f "$brewfile" ]; then
         log_warning "Brewfile not found at $brewfile — skipping brew bundle"
@@ -187,6 +186,12 @@ run_brew_bundle() {
 
 # Install core dependencies
 install_core_deps() {
+    # Skip if all core tools are already present
+    if command_exists git && command_exists stow && command_exists zsh && command_exists curl; then
+        log_success "Core dependencies already installed"
+        return
+    fi
+
     log_info "Installing core dependencies..."
 
     case "$OS-$DISTRO" in
@@ -792,7 +797,7 @@ install_fd() {
 }
 
 # Install zsh plugins (autosuggestions, syntax highlighting, fzf-tab)
-# macOS: handled by Brewfile; Linux: native packages + git clone for fzf-tab
+# macOS: autosuggestions/syntax-highlighting handled by Brewfile; fzf-tab cloned on all platforms
 install_zsh_plugins() {
     if [ "$OS" = "linux" ]; then
         log_info "Installing zsh plugins..."
@@ -811,7 +816,7 @@ install_zsh_plugins() {
         esac
     fi
 
-    # fzf-tab is not packaged for any distro — clone from GitHub
+    # fzf-tab is not packaged anywhere — clone from GitHub on all platforms
     local fzf_tab_dir="$HOME/.config/zsh/plugins/fzf-tab"
     if [ ! -d "$fzf_tab_dir" ]; then
         log_info "Installing fzf-tab..."
@@ -899,18 +904,21 @@ backup_existing_configs() {
 deploy_dotfiles() {
     log_info "Deploying dotfiles packages..."
 
-    # Check if we have GNU Stow
     if ! command_exists stow; then
         log_error "GNU Stow is not installed. Please install it first."
         exit 1
     fi
 
+    log_info "Initialising git submodules..."
+    git -C "$SCRIPT_DIR" submodule update --init --recursive
+    log_success "Submodules initialised"
+
     # Deploy each package — use --restow (-R) so re-runs and new files in
     # existing packages are handled correctly on non-fresh machines
     for package in $PACKAGES_TO_STOW; do
-        if [ -d "$package" ]; then
+        if [ -d "$SCRIPT_DIR/$package" ]; then
             log_info "Deploying $package package..."
-            stow -R "$package"
+            stow -d "$SCRIPT_DIR" -t "$HOME" -R "$package"
         else
             log_warning "Package directory '$package' not found, skipping..."
         fi
@@ -1038,9 +1046,9 @@ main() {
         install_eza
         install_ripgrep
         install_fd
-        [ "$configure_zsh" = true ] && install_zsh_plugins
     fi
     install_tmux_theme
+    [ "$configure_zsh" != false ] && install_zsh_plugins
 
     if [ "$skip_deploy" = true ]; then
         log_success "Dependencies installation complete! 🎉"

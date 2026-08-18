@@ -816,16 +816,7 @@ install_zsh_plugins() {
         esac
     fi
 
-    # fzf-tab is not packaged anywhere — clone from GitHub on all platforms
-    local fzf_tab_dir="$HOME/.config/zsh/plugins/fzf-tab"
-    if [ ! -d "$fzf_tab_dir" ]; then
-        log_info "Installing fzf-tab..."
-        mkdir -p "$(dirname "$fzf_tab_dir")"
-        git clone --depth=1 https://github.com/Aloxaf/fzf-tab "$fzf_tab_dir"
-        log_success "fzf-tab installed"
-    else
-        log_success "fzf-tab already installed"
-    fi
+    # fzf-tab is a git submodule — populated by deploy_dotfiles via submodule update --init
 }
 
 # Prompt user to set zsh as the default login shell
@@ -1103,11 +1094,14 @@ main() {
     [ "$configure_zsh" = true ] && configure_default_shell
 
     log_info "Installing git hooks..."
+    # Ensure ~/.local/bin is in PATH so lefthook is findable if it was just installed there
+    export PATH="$HOME/.local/bin:$PATH"
     lefthook install && log_success "Lefthook hooks installed"
 
-    # Rebuild bat cache for delta syntax themes
+    # Rebuild bat cache — clear first to handle version mismatches after upgrades
     if command_exists bat; then
         log_info "Rebuilding bat cache for delta themes..."
+        bat cache --clear >/dev/null 2>&1 || true
         bat cache --build >/dev/null 2>&1 && log_success "Bat cache rebuilt"
     fi
 

@@ -5,6 +5,8 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -12,11 +14,12 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Logging functions
-log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+# Logging functions — all write to stderr so command substitution (backup_dir=$(fn))
+# only captures the intended return value, not incidental log output.
+log_info() { echo -e "${BLUE}[INFO]${NC} $1" >&2; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1" >&2; }
+log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1" >&2; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 
 # Check if command exists
 command_exists() {
@@ -25,13 +28,10 @@ command_exists() {
 
 # Find most recent backup
 find_backup() {
-    local backup_pattern="$HOME/.dotfiles-backup-*"
     local latest_backup=""
 
-    for backup_dir in $backup_pattern; do
-        if [ -d "$backup_dir" ]; then
-            latest_backup="$backup_dir"
-        fi
+    for backup_dir in "$HOME"/.dotfiles-backup-*/; do
+        [ -d "$backup_dir" ] && latest_backup="$backup_dir"
     done
 
     echo "$latest_backup"
@@ -39,24 +39,21 @@ find_backup() {
 
 # List available backups
 list_backups() {
-    local backup_pattern="$HOME/.dotfiles-backup-*"
     local found_backups=()
 
-    for backup_dir in $backup_pattern; do
-        if [ -d "$backup_dir" ]; then
-            found_backups+=("$backup_dir")
-        fi
+    for backup_dir in "$HOME"/.dotfiles-backup-*/; do
+        [ -d "$backup_dir" ] && found_backups+=("$backup_dir")
     done
 
     if [ ${#found_backups[@]} -eq 0 ]; then
         return 1
     fi
 
-    echo "Available backups:"
+    echo "Available backups:" >&2
     for i in "${!found_backups[@]}"; do
         local backup_date
         backup_date=$(basename "${found_backups[$i]}" | sed 's/.dotfiles-backup-//')
-        echo "  $((i + 1)). ${found_backups[$i]} (created: ${backup_date})"
+        echo "  $((i + 1)). ${found_backups[$i]} (created: ${backup_date})" >&2
     done
 
     return 0
@@ -88,7 +85,8 @@ snapshot_current_config() {
         ".config/fzf"
         ".config/nvim"
         ".config/bat"
-        ".config/tmux/tmux.conf"
+        ".tmux.conf"
+        ".tmux.conf.local"
     )
 
     for rel_path in "${managed[@]}"; do
@@ -113,9 +111,10 @@ snapshot_current_config() {
 unstow_dotfiles() {
     log_info "Removing dotfiles symlinks..."
 
-    if [ -f ".stow-local-ignore" ]; then
+    if [ -f "$SCRIPT_DIR/.stow-local-ignore" ]; then
         if command_exists stow; then
-            stow -D shell bash zsh git starship fzf nvim bat tmux 2>/dev/null || true
+            stow -d "$SCRIPT_DIR" -t "$HOME" -D shell bash zsh git starship fzf nvim bat tmux \
+                || log_warning "stow -D reported errors — some symlinks may remain"
             log_success "Dotfiles unstowed"
         else
             log_warning "Stow not found, manually removing symlinks..."
@@ -158,37 +157,58 @@ manual_unstow() {
     done
 }
 
-# Remove plugins cloned by install.sh into ~/.config
+# Remove plugins and binaries installed by install.sh outside of stow packages
 remove_cloned_plugins() {
     log_info "Removing cloned plugins..."
 
-    local plugins=(
-        "$HOME/.config/zsh/plugins/fzf-tab"
-        "$HOME/.config/tmux/plugins/catppuccin"
-    )
+    # oh-my-tmux: remove TPM and all installed plugins, then the ~/.tmux.conf symlink
+    if [ -d "$HOME/.tmux/plugins" ]; then
+        rm -rf "$HOME/.tmux/plugins"
+        log_info "Removed TPM and tmux plugins (~/.tmux/plugins/)"
+    fi
+    rmdir "$HOME/.tmux" 2>/dev/null || true
+    if [ -L "$HOME/.tmux.conf" ]; then
+        rm "$HOME/.tmux.conf"
+        log_info "Removed ~/.tmux.conf symlink"
+    fi
 
-    for plugin_dir in "${plugins[@]}"; do
-        if [ -d "$plugin_dir" ]; then
-            rm -rf "$plugin_dir"
-            log_info "Removed plugin: $plugin_dir"
+    # GitHub release binaries downloaded by install.sh to ~/.local/bin
+    # Only removed if present — package-manager installs go to /usr/bin and are untouched.
+    log_info "Removing ~/.local/bin binaries installed by install.sh..."
+    local local_bins=(shfmt lefthook git-cliff yq glab eza)
+    local bin
+    for bin in "${local_bins[@]}"; do
+        local p="$HOME/.local/bin/$bin"
+        if [ -f "$p" ]; then
+            rm "$p"
+            log_info "Removed ~/.local/bin/$bin"
         fi
     done
 
-    log_success "Cloned plugins removed"
+    # Linux fonts installed by install_nerd_font() to ~/.local/share/fonts/
+    # macOS fonts are managed by Homebrew casks — not removed here.
+    local font_dir="$HOME/.local/share/fonts/JetBrainsMono"
+    if [ -d "$font_dir" ]; then
+        rm -rf "$font_dir"
+        fc-cache -fv >/dev/null 2>&1
+        log_info "Removed JetBrains Mono Nerd Font"
+    fi
+
+    log_success "Plugins, local binaries, and fonts removed"
 }
 
 # Interactive backup selection
 select_backup() {
     if ! list_backups; then
         log_error "No backups found in $HOME/.dotfiles-backup-*"
-        echo ""
-        echo "If you have a backup elsewhere, you can restore it manually:"
-        echo "1. Copy your backup files to their original locations"
-        echo "2. Remove any dotfiles symlinks"
+        echo "" >&2
+        echo "If you have a backup elsewhere, you can restore it manually:" >&2
+        echo "1. Copy your backup files to their original locations" >&2
+        echo "2. Remove any dotfiles symlinks" >&2
         return 1
     fi
 
-    echo ""
+    echo "" >&2
     read -r -p "Select backup to restore (number) or 'q' to quit: " choice
 
     if [ "$choice" = "q" ]; then
@@ -196,13 +216,10 @@ select_backup() {
         exit 0
     fi
 
-    local backup_pattern="$HOME/.dotfiles-backup-*"
     local found_backups=()
 
-    for backup_dir in $backup_pattern; do
-        if [ -d "$backup_dir" ]; then
-            found_backups+=("$backup_dir")
-        fi
+    for backup_dir in "$HOME"/.dotfiles-backup-*/; do
+        [ -d "$backup_dir" ] && found_backups+=("$backup_dir")
     done
 
     if [[ $choice =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#found_backups[@]} ]; then
@@ -284,14 +301,14 @@ main() {
                 echo "Options:"
                 echo "  --auto             Use most recent backup automatically"
                 echo "  --backup DIR       Use specific backup directory"
-                echo "  --skip-plugins     Keep cloned plugins (fzf-tab, catppuccin tmux)"
+                echo "  --skip-plugins     Keep catppuccin tmux theme and ~/.local/bin binaries"
                 echo "  --skip-snapshot    Skip pre-uninstall config snapshot"
                 echo "  -h, --help         Show this help message"
                 exit 0
                 ;;
             *)
                 log_error "Unknown option: $1"
-                echo "Use --help for usage information"
+                echo "Use --help for usage information" >&2
                 exit 1
                 ;;
         esac
@@ -320,11 +337,11 @@ main() {
 
     restore_backup "$backup_dir"
 
-    echo ""
+    echo "" >&2
     log_success "Dotfiles successfully uninstalled! 🎉"
-    echo ""
-    echo "Your original configuration has been restored."
-    echo 'You may want to restart your shell: exec $SHELL'
+    echo "" >&2
+    echo "Your original configuration has been restored." >&2
+    echo 'You may want to restart your shell: exec $SHELL' >&2
 }
 
 # Run main function

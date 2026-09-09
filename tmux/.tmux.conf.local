@@ -1,0 +1,46 @@
+# ~/.tmux.conf.local — oh-my-tmux user configuration
+# This file is sourced by oh-my-tmux (~/.tmux.conf → tmux-ohmytmux/.tmux.conf).
+# oh-my-tmux initializes TPM at the end of its main config — do NOT add a run line here.
+
+# Disable oh-my-tmux's built-in theme so Catppuccin (TPM) owns the status bar
+tmux_conf_theme=disabled
+
+# Powerline separators (requires a Nerd Font)
+tmux_conf_theme_left_separator_main=''
+tmux_conf_theme_left_separator_sub=''
+tmux_conf_theme_right_separator_main=''
+tmux_conf_theme_right_separator_sub=''
+
+# Start windows and panes in the current directory
+tmux_conf_new_window_retain_current_path=true
+tmux_conf_new_pane_retain_current_path=true
+
+# Mouse on by default (toggle with <prefix> m)
+tmux_conf_mouse_mode=true
+
+# Highlight the active pane with a subtle border
+tmux_conf_theme_highlight_focused_pane=true
+
+# vi-style copy mode
+tmux_conf_copy_mode=vi
+
+# Extended scrollback history
+tmux_conf_history_lines=50000
+
+# Aggressive resize: use the smallest attached client's dimensions
+tmux_conf_aggressive_resize=true
+
+# TPM plugins — oh-my-tmux runs TPM after sourcing this file
+set -g @plugin 'catppuccin/tmux'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @plugin 'tmux-plugins/tmux-yank'
+set -g @plugin 'jaclu/tmux-menus'
+set -g @plugin 'tmux-plugins/tmux-cpu'
+set -g @plugin 'tmux-plugins/tmux-battery'
+
+# Catppuccin Macchiato theme
+set -g @catppuccin_flavor 'macchiato'
+
+# Persist sessions across restarts and auto-restore on server start
+set -g @continuum-restore 'on'

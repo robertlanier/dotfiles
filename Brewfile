@@ -41,3 +41,6 @@ brew "shfmt"
 
 # Credentials
 cask "git-credential-manager"
+
+# Fonts
+cask "font-caskaydia-cove-nerd-font"

@@ -1,12 +1,18 @@
+# OS
 .DS_Store
+
+# Language / runtime artifacts
 **/__pycache__/
 **/*.pyc
 **/node_modules/
 **/logs/
-# zsh runtime state — do not version
+
+# Shell runtime state
 zsh/.config/zsh/sessions/
 **/*history
 **/*.session
-# machine-local overrides — not tracked in repo
+
+# Machine-local overrides — not tracked in repo
+*.local.*
 shell/.config/shell/local.sh
 git/.config/git/config.local

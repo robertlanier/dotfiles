@@ -11,8 +11,11 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
         export WSL_VERSION=1
     fi
 
-    # Windows interop — add Windows paths
-    export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
+    # Windows interop — add Windows paths (WSL2 injects them automatically; guard avoids duplication)
+    for _wp in /mnt/c/Windows/System32 /mnt/c/Windows; do
+        case ":$PATH:" in *":$_wp:"*) ;; *) PATH="$PATH:$_wp" ;; esac
+    done
+    unset _wp
 
     # Browser integration
     # Prefer wslview (wslu) if available; fall back to explorer.exe.
@@ -33,9 +36,13 @@ if grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null; then
         alias pbpaste='powershell.exe Get-Clipboard'
     fi
 
-    # Fix for WSL 1 interop issues
+    # Disable bell in WSL 1 — `set bell-style none` is a readline directive, not a shell builtin;
+    # use the shell-appropriate API so positional params are not clobbered.
     if [ "$WSL_VERSION" = "1" ]; then
-        # Disable bell in WSL 1 (can be annoying)
-        set bell-style none 2>/dev/null || true
+        if [ -n "$BASH_VERSION" ]; then
+            bind 'set bell-style none' 2>/dev/null || true
+        elif [ -n "$ZSH_VERSION" ]; then
+            unsetopt BEEP 2>/dev/null || true
+        fi
     fi
 fi

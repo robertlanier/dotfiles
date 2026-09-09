@@ -103,6 +103,11 @@ enable_epel() {
         *) return ;;
     esac
 
+    if ! command_exists dnf; then
+        log_warning "EPEL setup requires dnf — skipping on yum-only systems (RHEL 7)"
+        return
+    fi
+
     if dnf repolist enabled 2>/dev/null | grep -q "^epel"; then
         log_success "EPEL already enabled"
         return
@@ -216,7 +221,8 @@ install_starship() {
     fi
 
     log_info "Installing Starship prompt..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
+    curl -sS https://starship.rs/install.sh | sh -s -- -y \
+        || log_warning "Starship installation failed — install manually: https://starship.rs"
 }
 
 # Install fastfetch
@@ -255,12 +261,14 @@ install_zoxide() {
     case "$OS-$DISTRO" in
         "linux-ubuntu" | "linux-debian")
             if ! sudo apt install -y zoxide 2>/dev/null; then
-                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash \
+                    || log_warning "zoxide installation failed — install manually: https://github.com/ajeetdsouza/zoxide"
             fi
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
             if ! sudo "$PACKAGE_MANAGER" install -y zoxide 2>/dev/null; then
-                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash \
+                    || log_warning "zoxide installation failed — install manually: https://github.com/ajeetdsouza/zoxide"
             fi
             ;;
     esac
@@ -353,7 +361,11 @@ _install_shfmt_binary() {
     mkdir -p "$HOME/.local/bin"
     curl -fsSL \
         "https://github.com/mvdan/sh/releases/download/${version}/shfmt_${version}_linux_${arch}" \
-        -o "$HOME/.local/bin/shfmt"
+        -o "$HOME/.local/bin/shfmt" \
+        || {
+            log_warning "Failed to download shfmt — install manually: https://github.com/mvdan/sh/releases"
+            return
+        }
     chmod +x "$HOME/.local/bin/shfmt"
     log_success "shfmt ${version} installed to ~/.local/bin"
 }
@@ -391,7 +403,11 @@ install_lefthook() {
     mkdir -p "$HOME/.local/bin"
     curl -fsSL \
         "https://github.com/evilmartians/lefthook/releases/download/v${version}/lefthook_${version}_Linux_${arch}" \
-        -o "$HOME/.local/bin/lefthook"
+        -o "$HOME/.local/bin/lefthook" \
+        || {
+            log_warning "Failed to download lefthook — install manually: https://github.com/evilmartians/lefthook/releases"
+            return
+        }
     chmod +x "$HOME/.local/bin/lefthook"
 }
 
@@ -415,7 +431,8 @@ install_neovim() {
 
 # Install bat (for delta syntax themes)
 install_bat() {
-    if command_exists bat; then
+    # Ubuntu/Debian ship bat as batcat; check both names
+    if command_exists bat || command_exists batcat; then
         log_success "Bat already installed"
         return
     fi
@@ -490,11 +507,21 @@ install_gitcliff() {
     local tarball="git-cliff-${version}-${arch}-unknown-linux-musl.tar.gz"
     curl -fsSL \
         "https://github.com/orhun/git-cliff/releases/download/v${version}/${tarball}" \
-        -o "$tmp_dir/git-cliff.tar.gz"
+        -o "$tmp_dir/git-cliff.tar.gz" \
+        || {
+            log_warning "Failed to download git-cliff — install manually: https://github.com/orhun/git-cliff/releases"
+            rm -rf "$tmp_dir"
+            return
+        }
     tar -xzf "$tmp_dir/git-cliff.tar.gz" -C "$tmp_dir"
     mkdir -p "$HOME/.local/bin"
     local binary
     binary=$(find "$tmp_dir" -name "git-cliff" -type f | head -1)
+    if [ -z "$binary" ]; then
+        log_warning "git-cliff binary not found in archive — install manually"
+        rm -rf "$tmp_dir"
+        return
+    fi
     mv "$binary" "$HOME/.local/bin/git-cliff"
     chmod +x "$HOME/.local/bin/git-cliff"
     rm -rf "$tmp_dir"
@@ -512,7 +539,8 @@ install_direnv() {
         "linux-ubuntu" | "linux-debian")
             if ! sudo apt install -y direnv 2>/dev/null; then
                 log_warning "direnv not available in apt repos, falling back to curl install..."
-                curl -sfL https://direnv.net/install.sh | bash
+                curl -sfL https://direnv.net/install.sh | bash \
+                    || log_warning "direnv curl install failed — install manually: https://direnv.net"
             fi
             ;;
         "linux-fedora")
@@ -520,7 +548,8 @@ install_direnv() {
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
             # direnv is not in EPEL 9 — use the official installer
-            curl -sfL https://direnv.net/install.sh | bash
+            curl -sfL https://direnv.net/install.sh | bash \
+                || log_warning "direnv curl install failed — install manually: https://direnv.net"
             ;;
     esac
     if ! command_exists direnv; then
@@ -586,7 +615,11 @@ _install_yq_binary() {
     mkdir -p "$HOME/.local/bin"
     curl -fsSL \
         "https://github.com/mikefarah/yq/releases/download/v${version}/yq_linux_${arch}" \
-        -o "$HOME/.local/bin/yq"
+        -o "$HOME/.local/bin/yq" \
+        || {
+            log_warning "Failed to download yq — install manually: https://github.com/mikefarah/yq/releases"
+            return
+        }
     chmod +x "$HOME/.local/bin/yq"
     log_success "yq v${version} installed to ~/.local/bin"
 }
@@ -639,11 +672,21 @@ _install_glab_binary() {
     tmp_dir=$(mktemp -d)
     curl -fsSL \
         "https://gitlab.com/gitlab-org/cli/-/releases/v${version}/downloads/glab_${version}_Linux_${arch}.tar.gz" \
-        -o "$tmp_dir/glab.tar.gz"
+        -o "$tmp_dir/glab.tar.gz" \
+        || {
+            log_warning "Failed to download glab — install manually: https://gitlab.com/gitlab-org/cli/-/releases"
+            rm -rf "$tmp_dir"
+            return
+        }
     tar -xzf "$tmp_dir/glab.tar.gz" -C "$tmp_dir"
     mkdir -p "$HOME/.local/bin"
     local binary
     binary=$(find "$tmp_dir" -name "glab" -type f | head -1)
+    if [ -z "$binary" ]; then
+        log_warning "glab binary not found in archive — install manually"
+        rm -rf "$tmp_dir"
+        return
+    fi
     mv "$binary" "$HOME/.local/bin/glab"
     chmod +x "$HOME/.local/bin/glab"
     rm -rf "$tmp_dir"
@@ -668,23 +711,100 @@ install_tmux() {
     esac
 }
 
-# Install Catppuccin theme for tmux (manual install — avoids TPM name conflict issues)
-install_tmux_theme() {
-    local plugin_dir="$HOME/.config/tmux/plugins/catppuccin/tmux"
-
-    if [ -d "$plugin_dir" ]; then
-        log_success "Catppuccin tmux theme already installed"
+# Install Nerd Font
+# macOS: CaskaydiaCove NF — handled by the Brewfile cask (font-caskaydia-cove-nerd-font)
+#        Configure your terminal with font family "CaskaydiaCove Nerd Font"
+# Linux: JetBrains Mono NF — not in any distro repos; download from GitHub Nerd Fonts releases
+#        Configure your terminal with font family "JetBrainsMono Nerd Font"
+install_nerd_font() {
+    if [ "$OS" = "macos" ]; then
         return
     fi
 
+    # Check fontconfig and the install directory so re-runs are instant
+    if { command_exists fc-list && fc-list 2>/dev/null | grep -qi "JetBrainsMono"; } \
+        || [ -d "$HOME/.local/share/fonts/JetBrainsMono" ]; then
+        log_success "JetBrains Mono Nerd Font already installed"
+        return
+    fi
+
+    log_info "Installing JetBrains Mono Nerd Font..."
+
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/ryanoasis/nerd-fonts/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine Nerd Fonts version — install manually: https://github.com/ryanoasis/nerd-fonts/releases"
+        return
+    fi
+
+    local font_dir="$HOME/.local/share/fonts/JetBrainsMono"
+    local tmp_file
+    tmp_file=$(mktemp --suffix=.tar.xz)
+
+    curl -fsSL \
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/JetBrainsMono.tar.xz" \
+        -o "$tmp_file" \
+        || {
+            log_warning "Failed to download JetBrains Mono Nerd Font — install manually: https://github.com/ryanoasis/nerd-fonts/releases"
+            rm -f "$tmp_file"
+            return
+        }
+
+    mkdir -p "$font_dir"
+    tar -xJf "$tmp_file" -C "$font_dir" \
+        || {
+            log_warning "Failed to extract JetBrains Mono Nerd Font"
+            rm -f "$tmp_file"
+            return
+        }
+    rm -f "$tmp_file"
+    fc-cache -fv >/dev/null 2>&1
+    log_success "JetBrains Mono Nerd Font v${version} installed to ~/.local/share/fonts/"
+}
+
+# Remove the old manual Catppuccin clone and empty config dirs from the pre-oh-my-tmux setup.
+# stow -R handles the ~/.config/tmux/tmux.conf symlink; this cleans what stow can't.
+migrate_tmux_config() {
+    local old_plugin="$HOME/.config/tmux/plugins/catppuccin"
+    if [ -d "$old_plugin" ]; then
+        log_info "Removing old Catppuccin tmux plugin (now managed by TPM)..."
+        rm -rf "$old_plugin"
+    fi
+    rmdir "$HOME/.config/tmux/plugins" 2>/dev/null || true
+    rmdir "$HOME/.config/tmux" 2>/dev/null || true
+}
+
+# Install oh-my-tmux + TPM + all plugins declared in .tmux.conf.local
+install_ohmytmux() {
     if ! command_exists tmux; then
         return
     fi
 
-    log_info "Installing Catppuccin tmux theme..."
-    mkdir -p "$(dirname "$plugin_dir")"
-    git clone --depth=1 -b v2.3.0 https://github.com/catppuccin/tmux.git "$plugin_dir"
-    log_success "Catppuccin tmux theme installed"
+    # Wire ~/.tmux.conf to the oh-my-tmux submodule config
+    local ohmytmux_conf="$SCRIPT_DIR/tmux-ohmytmux/.tmux.conf"
+    if [ ! -f "$HOME/.tmux.conf" ] || [ "$(readlink "$HOME/.tmux.conf" 2>/dev/null)" != "$ohmytmux_conf" ]; then
+        log_info "Linking oh-my-tmux configuration..."
+        ln -sf "$ohmytmux_conf" "$HOME/.tmux.conf"
+    fi
+
+    # Clone TPM if not already present
+    local tpm_dir="$HOME/.tmux/plugins/tpm"
+    if [ ! -d "$tpm_dir" ]; then
+        log_info "Installing TPM (Tmux Plugin Manager)..."
+        mkdir -p "$HOME/.tmux/plugins"
+        git clone --depth=1 https://github.com/tmux-plugins/tpm "$tpm_dir" \
+            || {
+                log_warning "Failed to clone TPM — plugins will not be installed"
+                return
+            }
+    fi
+
+    # Install all TPM plugins declared in .tmux.conf.local
+    log_info "Installing TPM plugins..."
+    TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins" \
+        "$tpm_dir/bin/install_plugins" \
+        && log_success "TPM plugins installed"
 }
 
 # Install herdr (runtime for AI coding agents)
@@ -694,12 +814,13 @@ install_herdr() {
         return
     fi
 
-    if [ "$OS" != "linux" ]; then
+    if [ "$OS" != "macos" ]; then
         return
     fi
 
     log_info "Installing herdr..."
-    curl -fsSL https://herdr.dev/install.sh | sh
+    curl -fsSL https://herdr.dev/install.sh | sh \
+        || log_warning "herdr installation failed — install manually: https://herdr.dev"
 }
 
 # Install eza (modern ls replacement)
@@ -750,10 +871,22 @@ _install_eza_binary() {
     tmp_dir=$(mktemp -d)
     curl -fsSL \
         "https://github.com/eza-community/eza/releases/download/v${version}/eza_${arch}-unknown-linux-musl.tar.gz" \
-        -o "$tmp_dir/eza.tar.gz"
+        -o "$tmp_dir/eza.tar.gz" \
+        || {
+            log_warning "Failed to download eza — install manually: https://github.com/eza-community/eza/releases"
+            rm -rf "$tmp_dir"
+            return
+        }
     tar -xzf "$tmp_dir/eza.tar.gz" -C "$tmp_dir"
     mkdir -p "$HOME/.local/bin"
-    mv "$tmp_dir/eza" "$HOME/.local/bin/eza"
+    local binary
+    binary=$(find "$tmp_dir" -name "eza" -type f | head -1)
+    if [ -z "$binary" ]; then
+        log_warning "eza binary not found in archive — install manually: https://github.com/eza-community/eza/releases"
+        rm -rf "$tmp_dir"
+        return
+    fi
+    mv "$binary" "$HOME/.local/bin/eza"
     chmod +x "$HOME/.local/bin/eza"
     rm -rf "$tmp_dir"
     log_success "eza ${version} installed to ~/.local/bin"
@@ -854,14 +987,24 @@ configure_default_shell() {
     if chsh -s "$zsh_path" 2>/dev/null; then
         log_success "Default shell set to zsh — restart your terminal to apply"
     else
-        # chsh fails on domain/AD accounts — fall back to exec zsh in .bash_profile
-        log_warning "chsh failed (likely a domain account) — adding 'exec zsh' to ~/.bashrc instead"
-        local bashrc="$HOME/.bashrc"
-        if ! grep -q "exec zsh" "$bashrc" 2>/dev/null; then
-            printf '\n# Launch zsh for interactive sessions (chsh unavailable on domain accounts)\n[ -t 1 ] && command -v zsh >/dev/null && exec zsh\n' >> "$bashrc"
+        # chsh fails on domain/AD accounts — fall back to exec zsh in local.sh
+        log_warning "chsh failed (likely a domain account) — adding 'exec zsh' to ~/.config/shell/local.sh instead"
+        local local_sh="$HOME/.config/shell/local.sh"
+        # Check both the dispatcher and the bash sub-config where the exec zsh line lives
+        if ! grep -q "exec zsh" "$local_sh" 2>/dev/null \
+            && ! grep -q "exec zsh" "$HOME/.config/bash/.bashrc" 2>/dev/null; then
+            mkdir -p "$(dirname "$local_sh")"
+            printf '\n# Launch zsh for interactive sessions (chsh unavailable on domain accounts)\n[[ $- == *i* ]] && command -v zsh >/dev/null && exec zsh\n' >>"$local_sh"
         fi
-        log_success "Added 'exec zsh' to ~/.bashrc — restart your terminal to apply"
+        log_success "Added 'exec zsh' to ~/.config/shell/local.sh — restart your terminal to apply"
     fi
+}
+
+# Returns true when dotfiles are already stow-deployed on this machine.
+# ~/.bashrc is the canonical indicator — it is always managed by the bash package.
+is_deployed() {
+    local key="$HOME/.bashrc"
+    [ -L "$key" ] && [[ "$(readlink -f "$key" 2>/dev/null)" == "$SCRIPT_DIR/"* ]]
 }
 
 # Create backup of existing config files
@@ -890,7 +1033,6 @@ backup_existing_configs() {
     fi
 }
 
-
 # Deploy dotfiles using stow
 deploy_dotfiles() {
     log_info "Deploying dotfiles packages..."
@@ -904,8 +1046,24 @@ deploy_dotfiles() {
     git -C "$SCRIPT_DIR" submodule update --init --recursive
     log_success "Submodules initialised"
 
-    # Deploy each package — use --restow (-R) so re-runs and new files in
-    # existing packages are handled correctly on non-fresh machines
+    # Dry-run first: surface any conflicts before a single symlink is touched.
+    # stow -nR simulates the full restow and exits non-zero on any conflict.
+    log_info "Checking for conflicts..."
+    local conflict=false
+    for package in $PACKAGES_TO_STOW; do
+        if [ -d "$SCRIPT_DIR/$package" ]; then
+            if ! stow -d "$SCRIPT_DIR" -t "$HOME" -nR "$package" 2>/dev/null; then
+                log_error "Conflict in '$package' — inspect with: stow -d '$SCRIPT_DIR' -t '$HOME' -nRv '$package'"
+                conflict=true
+            fi
+        fi
+    done
+    if [ "$conflict" = true ]; then
+        log_error "Resolve conflicts above before deploying."
+        exit 1
+    fi
+
+    # Real deploy — each package uses -R (restow) to handle new/removed files
     for package in $PACKAGES_TO_STOW; do
         if [ -d "$SCRIPT_DIR/$package" ]; then
             log_info "Deploying $package package..."
@@ -934,7 +1092,6 @@ migrate_git_config() {
     # Ensure the directory exists so the config.local include in .gitconfig resolves
     mkdir -p "$old_dir"
 }
-
 
 main() {
     echo "🧩 Dotfiles Installation Script"
@@ -974,7 +1131,7 @@ main() {
                 echo ""
                 echo "Options:"
                 echo "  --deps-only     Install dependencies only, no config changes"
-                echo "  --skip-backup   Skip backing up existing config files"
+                echo "  --skip-backup   Skip backup and restore prompt"
                 echo "  --skip-deploy   Skip deploying dotfiles (backup and install deps only)"
                 echo "  --zsh           Configure zsh as default shell (non-interactive)"
                 echo "  --no-zsh        Skip zsh plugins and shell switch (non-interactive)"
@@ -988,6 +1145,13 @@ main() {
                 ;;
         esac
     done
+
+    # Detect whether dotfiles are already stow-deployed on this machine
+    local update_mode=false
+    is_deployed && update_mode=true
+    if [ "$update_mode" = true ]; then
+        log_info "Existing deployment detected — running in update mode"
+    fi
 
     detect_os
     install_package_manager
@@ -1033,12 +1197,13 @@ main() {
         install_yq
         install_glab
         install_tmux
-        install_herdr
         install_eza
         install_ripgrep
         install_fd
     fi
-    install_tmux_theme
+    install_nerd_font
+    install_ohmytmux
+    install_herdr
     [ "$configure_zsh" != false ] && install_zsh_plugins
 
     if [ "$skip_deploy" = true ]; then
@@ -1052,36 +1217,47 @@ main() {
     fi
 
     echo ""
-    log_info "Starting dotfiles deployment..."
+    if [ "$update_mode" = true ]; then
+        log_info "Updating dotfiles deployment..."
+    else
+        log_info "Starting dotfiles deployment..."
+    fi
     echo ""
 
-    # Check for an existing backup and offer to restore before proceeding
-    local existing_backup=""
-    for _d in "$HOME"/.dotfiles-backup-* "$HOME"/.dotfiles-snapshot-*; do
-        [ -d "$_d" ] && existing_backup="$_d"
-    done
-    if [ -n "$existing_backup" ]; then
-        log_warning "Existing backup found: $existing_backup"
-        printf "Restore from this backup instead of deploying? [y/N] "
-        read -r _restore_response || _restore_response="n"
-        case "$_restore_response" in
-            [yY][eE][sS] | [yY])
-                log_info "Restoring from $existing_backup..."
-                while IFS= read -r -d '' _file; do
-                    _rel="${_file#"$existing_backup"/}"
-                    [ "$_rel" = "restore.sh" ] && continue
-                    mkdir -p "$HOME/$(dirname "$_rel")"
-                    local _target="$HOME/$_rel"
-                    [ -L "$_target" ] || [ -e "$_target" ] && rm -rf "${_target:?}"
-                    cp -r "$_file" "$HOME/$_rel"
-                done < <(find "$existing_backup" -type f -print0)
-                log_success "Restored — restart your shell: exec \$SHELL"
-                return
-                ;;
-        esac
+    # Offer restore only on a fresh install — skipped in update mode (dotfiles already
+    # active, nothing useful to restore) and when --skip-backup is passed.
+    if [ "$skip_backup" = false ] && [ "$update_mode" = false ]; then
+        local existing_backup=""
+        for _d in "$HOME"/.dotfiles-backup-* "$HOME"/.dotfiles-snapshot-*; do
+            if [ -d "$_d" ]; then
+                if [ -z "$existing_backup" ] || [ "$_d" -nt "$existing_backup" ]; then
+                    existing_backup="$_d"
+                fi
+            fi
+        done
+        if [ -n "$existing_backup" ]; then
+            log_warning "Existing backup found: $existing_backup"
+            printf "Restore from this backup instead of deploying? [y/N] "
+            read -r _restore_response || _restore_response="n"
+            case "$_restore_response" in
+                [yY][eE][sS] | [yY])
+                    log_info "Restoring from $existing_backup..."
+                    while IFS= read -r -d '' _file; do
+                        _rel="${_file#"$existing_backup"/}"
+                        mkdir -p "$HOME/$(dirname "$_rel")"
+                        local _target="$HOME/$_rel"
+                        [ -L "$_target" ] || [ -e "$_target" ] && rm -rf "${_target:?}"
+                        cp -r "$_file" "$HOME/$_rel"
+                    done < <(find "$existing_backup" -type f -print0)
+                    log_success 'Restored — restart your shell: exec $SHELL'
+                    return
+                    ;;
+            esac
+        fi
     fi
 
     migrate_git_config
+    migrate_tmux_config
 
     if [ "$skip_backup" = false ]; then
         backup_existing_configs
@@ -1096,13 +1272,20 @@ main() {
     log_info "Installing git hooks..."
     # Ensure ~/.local/bin is in PATH so lefthook is findable if it was just installed there
     export PATH="$HOME/.local/bin:$PATH"
-    lefthook install && log_success "Lefthook hooks installed"
+    if lefthook install; then
+        log_success "Lefthook hooks installed"
+    else
+        log_warning "lefthook install failed — run 'lefthook install' manually from the dotfiles directory"
+    fi
 
     # Rebuild bat cache — clear first to handle version mismatches after upgrades
-    if command_exists bat; then
+    # Ubuntu/Debian ship bat as batcat; resolve the correct binary name at runtime
+    local bat_cmd
+    bat_cmd=$(command -v bat 2>/dev/null || command -v batcat 2>/dev/null)
+    if [ -n "$bat_cmd" ]; then
         log_info "Rebuilding bat cache for delta themes..."
-        bat cache --clear >/dev/null 2>&1 || true
-        bat cache --build >/dev/null 2>&1 && log_success "Bat cache rebuilt"
+        "$bat_cmd" cache --clear >/dev/null 2>&1 || true
+        "$bat_cmd" cache --build >/dev/null 2>&1 && log_success "Bat cache rebuilt"
     fi
 
     echo ""
@@ -1111,7 +1294,7 @@ main() {
         log_info "Backup at: $BACKUP_DIR"
     fi
     echo ""
-    echo "Restart your shell: exec \$SHELL"
+    echo 'Restart your shell: exec $SHELL'
 }
 
 # Run main function

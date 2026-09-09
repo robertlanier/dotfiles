@@ -19,3 +19,7 @@ fi
 
 # 3) hand off to your existing zsh config
 [ -r "$HOME/.config/zsh/.zshrc" ] && . "$HOME/.config/zsh/.zshrc"
+
+# 4) machine-local overrides — sourced last so they win over all OS overlays
+# shellcheck source=/dev/null
+[ -r "$HOME/.config/shell/local.sh" ] && . "$HOME/.config/shell/local.sh"

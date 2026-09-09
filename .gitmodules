@@ -4,3 +4,6 @@
 [submodule "zsh/.config/zsh/plugins/zsh-fsh"]
 	path = zsh/.config/zsh/plugins/zsh-fsh
 	url = https://github.com/catppuccin/zsh-fsh
+[submodule "tmux-ohmytmux"]
+	path = tmux-ohmytmux
+	url = https://github.com/gpakosz/.tmux

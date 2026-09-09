@@ -20,3 +20,7 @@ fi
 
 # 3) bash-specific configuration
 [ -r "$HOME/.config/bash/.bashrc" ] && . "$HOME/.config/bash/.bashrc"
+
+# 4) machine-local overrides — sourced last so they win over all OS overlays
+# shellcheck source=/dev/null
+[ -r "$HOME/.config/shell/local.sh" ] && . "$HOME/.config/shell/local.sh"

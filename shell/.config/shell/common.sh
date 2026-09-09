@@ -59,7 +59,3 @@ elif command -v fdfind >/dev/null 2>&1; then
     alias find="fdfind"
     alias fd="fdfind"
 fi
-
-# Machine-local overrides (not tracked in repo — put work/machine-specific config here)
-# shellcheck source=/dev/null
-[ -f "$XDG_CONFIG_HOME/shell/local.sh" ] && . "$XDG_CONFIG_HOME/shell/local.sh"

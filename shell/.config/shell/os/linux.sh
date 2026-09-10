@@ -33,7 +33,7 @@ if command -v ssh-agent >/dev/null 2>&1 && command -v ssh-add >/dev/null 2>&1; t
         if [ -z "$SSH_AUTH_SOCK" ] || ! ssh-add -l >/dev/null 2>&1; then
             SSH_SOCK="${XDG_RUNTIME_DIR:-$HOME/.local/state}/ssh-agent.socket"
             rm -f "$SSH_SOCK"
-            ssh-agent -a "$SSH_SOCK" -s >"$SSH_ENV"
+            (umask 077 && ssh-agent -a "$SSH_SOCK" -s >"$SSH_ENV")
             # shellcheck source=/dev/null
             . "$SSH_ENV" >/dev/null
         fi

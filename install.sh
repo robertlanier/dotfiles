@@ -999,8 +999,10 @@ configure_default_shell() {
             && ! grep -q "exec zsh" "$HOME/.config/bash/.bashrc" 2>/dev/null; then
             mkdir -p "$(dirname "$local_sh")"
             printf '\n# Launch zsh for interactive sessions (chsh unavailable on domain accounts)\n[[ $- == *i* ]] && command -v zsh >/dev/null && exec zsh\n' >>"$local_sh"
+            log_success "Added 'exec zsh' to ~/.config/shell/local.sh — restart your terminal to apply"
+        else
+            log_info "zsh launch already configured — skipping"
         fi
-        log_success "Added 'exec zsh' to ~/.config/shell/local.sh — restart your terminal to apply"
     fi
 }
 

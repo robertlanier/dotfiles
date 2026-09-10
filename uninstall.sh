@@ -301,7 +301,7 @@ main() {
                 echo "Options:"
                 echo "  --auto             Use most recent backup automatically"
                 echo "  --backup DIR       Use specific backup directory"
-                echo "  --skip-plugins     Keep catppuccin tmux theme and ~/.local/bin binaries"
+                echo "  --skip-plugins     Keep ~/.tmux/plugins/, ~/.tmux.conf, ~/.local/bin binaries, and fonts"
                 echo "  --skip-snapshot    Skip pre-uninstall config snapshot"
                 echo "  -h, --help         Show this help message"
                 exit 0

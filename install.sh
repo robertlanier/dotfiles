@@ -193,7 +193,8 @@ run_brew_bundle() {
 # Install core dependencies
 install_core_deps() {
     # Skip if all core tools are already present
-    if command_exists git && command_exists stow && command_exists zsh && command_exists curl; then
+    if command_exists git && command_exists stow && command_exists zsh && command_exists curl \
+        && command_exists xz; then
         log_success "Core dependencies already installed"
         return
     fi
@@ -202,10 +203,10 @@ install_core_deps() {
 
     case "$OS-$DISTRO" in
         "linux-ubuntu" | "linux-debian")
-            sudo apt install -y git stow zsh curl wget bash-completion
+            sudo apt install -y git stow zsh curl wget bash-completion xz-utils
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
-            sudo "$PACKAGE_MANAGER" install -y git stow zsh curl wget bash-completion
+            sudo "$PACKAGE_MANAGER" install -y git stow zsh curl wget bash-completion xz
             ;;
         "macos"*)
             # git, stow, and all tools are managed by the Brewfile — nothing to do here
@@ -292,7 +293,11 @@ _install_zoxide_binary() {
     curl -fsSL \
         "https://github.com/ajeetdsouza/zoxide/releases/download/v${version}/zoxide-${version}-${arch}-unknown-linux-musl.tar.gz" \
         -o "$tmp_dir/zoxide.tar.gz" \
-        || { log_warning "Failed to download zoxide — install manually: https://github.com/ajeetdsouza/zoxide/releases"; rm -rf "$tmp_dir"; return; }
+        || {
+            log_warning "Failed to download zoxide — install manually: https://github.com/ajeetdsouza/zoxide/releases"
+            rm -rf "$tmp_dir"
+            return
+        }
     tar -xzf "$tmp_dir/zoxide.tar.gz" -C "$tmp_dir"
     mkdir -p "$HOME/.local/bin"
     local binary
@@ -609,7 +614,10 @@ _install_direnv_binary() {
     curl -fsSL \
         "https://github.com/direnv/direnv/releases/download/v${version}/direnv.linux-${arch}" \
         -o "$HOME/.local/bin/direnv" \
-        || { log_warning "Failed to download direnv — install manually: https://github.com/direnv/direnv/releases"; return; }
+        || {
+            log_warning "Failed to download direnv — install manually: https://github.com/direnv/direnv/releases"
+            return
+        }
     chmod +x "$HOME/.local/bin/direnv"
     log_success "direnv ${version} installed to ~/.local/bin"
 }

@@ -108,16 +108,6 @@ Located in [bash/.bashrc](bash/.bashrc) and [zsh/.zshrc](zsh/.zshrc):
 1. Runs `stow -D` to remove symlinks
 2. Restores files from timestamped backup directory
 
-### Dual-Remote Git Workflow
-
-This repo mirrors to two remotes:
-
-```bash
-git push origin main            # Primary remote (GitLab)
-git push github main            # Mirror (GitHub)
-```
-
-To add the GitHub mirror: `git remote add github git@github.com:robertlanier/dotfiles.git`
 
 ## Project-Specific Conventions
 
@@ -227,10 +217,3 @@ Each function has OS-specific branches for macOS (brew), Ubuntu (apt), Fedora/RH
 
 **Note**: SSH agent auto-start lives in `linux.sh` only — macOS manages this via launchd/Keychain and does not need it.
 
-### Why Dual Remotes?
-
-**Context**: Primary development on GitLab; GitHub serves as a public mirror.
-
-**Solution**: Two named remotes (`origin` for GitLab, `github` for GitHub). Push to each independently.
-
-**Benefit**: GitLab remains the source of truth; GitHub provides public discoverability.

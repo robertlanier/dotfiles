@@ -252,6 +252,16 @@ update_binary_tools() {
         "https://gitlab.com/gitlab-org/cli/-/releases/permalink/latest" \
         "https://gitlab.com/gitlab-org/cli/-/releases/v{VERSION}/downloads/glab_{VERSION}_Linux_{ARCH}.tar.gz" \
         "x86_64:x86_64,aarch64:arm64" "glab"
+
+    _update_binary "zoxide" "zoxide" \
+        "https://github.com/ajeetdsouza/zoxide/releases/latest" \
+        "https://github.com/ajeetdsouza/zoxide/releases/download/v{VERSION}/zoxide-{VERSION}-{ARCH}-unknown-linux-musl.tar.gz" \
+        "" "zoxide"
+
+    _update_binary "direnv" "direnv" \
+        "https://github.com/direnv/direnv/releases/latest" \
+        "https://github.com/direnv/direnv/releases/download/v{VERSION}/direnv.linux-{ARCH}" \
+        "x86_64:amd64,aarch64:arm64"
 }
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────

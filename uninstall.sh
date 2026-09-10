@@ -175,7 +175,7 @@ remove_cloned_plugins() {
     # GitHub release binaries downloaded by install.sh to ~/.local/bin
     # Only removed if present — package-manager installs go to /usr/bin and are untouched.
     log_info "Removing ~/.local/bin binaries installed by install.sh..."
-    local local_bins=(shfmt lefthook git-cliff yq glab eza)
+    local local_bins=(shfmt lefthook git-cliff yq glab eza zoxide direnv)
     local bin
     for bin in "${local_bins[@]}"; do
         local p="$HOME/.local/bin/$bin"

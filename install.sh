@@ -261,18 +261,51 @@ install_zoxide() {
     log_info "Installing Zoxide..."
     case "$OS-$DISTRO" in
         "linux-ubuntu" | "linux-debian")
-            if ! sudo apt install -y zoxide 2>/dev/null; then
-                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash \
-                    || log_warning "zoxide installation failed — install manually: https://github.com/ajeetdsouza/zoxide"
-            fi
+            sudo apt install -y zoxide 2>/dev/null || _install_zoxide_binary
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux" | "linux-fedora")
-            if ! sudo "$PACKAGE_MANAGER" install -y zoxide 2>/dev/null; then
-                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash \
-                    || log_warning "zoxide installation failed — install manually: https://github.com/ajeetdsouza/zoxide"
-            fi
+            sudo "$PACKAGE_MANAGER" install -y zoxide 2>/dev/null || _install_zoxide_binary
             ;;
     esac
+}
+
+# Download zoxide from GitHub releases — used when the package manager doesn't carry it
+_install_zoxide_binary() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64 | x86_64) ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install zoxide manually."
+            return
+            ;;
+    esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/ajeetdsouza/zoxide/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine zoxide version — install manually: https://github.com/ajeetdsouza/zoxide/releases"
+        return
+    fi
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    curl -fsSL \
+        "https://github.com/ajeetdsouza/zoxide/releases/download/v${version}/zoxide-${version}-${arch}-unknown-linux-musl.tar.gz" \
+        -o "$tmp_dir/zoxide.tar.gz" \
+        || { log_warning "Failed to download zoxide — install manually: https://github.com/ajeetdsouza/zoxide/releases"; rm -rf "$tmp_dir"; return; }
+    tar -xzf "$tmp_dir/zoxide.tar.gz" -C "$tmp_dir"
+    mkdir -p "$HOME/.local/bin"
+    local binary
+    binary=$(find "$tmp_dir" -name "zoxide" -type f | head -1)
+    if [ -z "$binary" ]; then
+        log_warning "zoxide binary not found in archive — install manually"
+        rm -rf "$tmp_dir"
+        return
+    fi
+    mv "$binary" "$HOME/.local/bin/zoxide"
+    chmod +x "$HOME/.local/bin/zoxide"
+    rm -rf "$tmp_dir"
+    log_success "zoxide ${version} installed to ~/.local/bin"
 }
 
 # Install fzf
@@ -538,24 +571,47 @@ install_direnv() {
     log_info "Installing direnv..."
     case "$OS-$DISTRO" in
         "linux-ubuntu" | "linux-debian")
-            if ! sudo apt install -y direnv 2>/dev/null; then
-                log_warning "direnv not available in apt repos, falling back to curl install..."
-                curl -sfL https://direnv.net/install.sh | bash \
-                    || log_warning "direnv curl install failed — install manually: https://direnv.net"
-            fi
+            sudo apt install -y direnv 2>/dev/null || _install_direnv_binary
             ;;
         "linux-fedora")
             sudo dnf install -y direnv
             ;;
         "linux-rhel" | "linux-centos" | "linux-rocky" | "linux-almalinux")
-            # direnv is not in EPEL 9 — use the official installer
-            curl -sfL https://direnv.net/install.sh | bash \
-                || log_warning "direnv curl install failed — install manually: https://direnv.net"
+            # direnv is not in EPEL 9 — install from GitHub releases
+            _install_direnv_binary
             ;;
     esac
     if ! command_exists direnv; then
         log_warning "direnv installation failed — install manually: https://direnv.net"
     fi
+}
+
+# Download direnv from GitHub releases — used when the package manager doesn't carry it
+_install_direnv_binary() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        aarch64) arch="arm64" ;;
+        x86_64) arch="amd64" ;;
+        *)
+            log_warning "Unsupported architecture: $arch. Install direnv manually."
+            return
+            ;;
+    esac
+    local version
+    version=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+        "https://github.com/direnv/direnv/releases/latest" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "$version" ]; then
+        log_warning "Could not determine direnv version — install manually: https://github.com/direnv/direnv/releases"
+        return
+    fi
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL \
+        "https://github.com/direnv/direnv/releases/download/v${version}/direnv.linux-${arch}" \
+        -o "$HOME/.local/bin/direnv" \
+        || { log_warning "Failed to download direnv — install manually: https://github.com/direnv/direnv/releases"; return; }
+    chmod +x "$HOME/.local/bin/direnv"
+    log_success "direnv ${version} installed to ~/.local/bin"
 }
 
 # Install jq (JSON processor)
@@ -818,13 +874,12 @@ install_herdr() {
         return
     fi
 
+    # herdr is macOS-only and managed by Brewfile (brew "herdr").
+    # run_brew_bundle runs earlier in the install and should have installed it.
     if [ "$OS" != "macos" ]; then
         return
     fi
-
-    log_info "Installing herdr..."
-    curl -fsSL https://herdr.dev/install.sh | sh \
-        || log_warning "herdr installation failed — install manually: https://herdr.dev"
+    log_warning "herdr not installed — re-run: brew bundle --file=\"$SCRIPT_DIR/Brewfile\""
 }
 
 # Install eza (modern ls replacement)

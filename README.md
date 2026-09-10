@@ -4,7 +4,7 @@
 [![Platform: macOS | Linux | WSL](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20WSL-green.svg)](https://github.com/robertlanier/dotfiles)
 [![Shell: Bash | Zsh](https://img.shields.io/badge/Shell-Bash%20%7C%20Zsh-informational.svg)](https://github.com/robertlanier/dotfiles)
 
-Personal configuration files managed with [GNU Stow](https://www.gnu.org/software/stow/). Supports macOS, Ubuntu, RHEL, Fedora, and WSL with automatic OS detection, a base + overlay shell architecture, and a single `install.sh` that handles everything.
+Personal configuration files managed with [GNU Stow](https://github.com/aspiers/stow). Supports macOS, Ubuntu, RHEL, Fedora, and WSL with automatic OS detection, a base + overlay shell architecture, and a single `install.sh` that handles everything.
 
 ## Quick Start
 
@@ -45,4 +45,4 @@ MIT — see [LICENSE](LICENSE).
 
 ## Acknowledgments
 
-[GNU Stow](https://www.gnu.org/software/stow/) · [Starship](https://starship.rs/) · [Catppuccin](https://github.com/catppuccin) · [oh-my-tmux](https://github.com/gpakosz/.tmux) · [fzf-tab](https://github.com/Aloxaf/fzf-tab)
+[GNU Stow](https://github.com/aspiers/stow) · [Starship](https://starship.rs/) · [Catppuccin](https://github.com/catppuccin) · [oh-my-tmux](https://github.com/gpakosz/.tmux) · [fzf-tab](https://github.com/Aloxaf/fzf-tab)

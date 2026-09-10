@@ -20,6 +20,8 @@ Defined in `lefthook.yml`. All hooks run against staged files only.
 
 ## ShellCheck Configuration
 
+`--shell=bash` is passed to ShellCheck for all staged files. This forces bash interpretation, which is correct for the shared config files sourced by both bash and zsh dispatchers.
+
 Excluded codes — intentional for a cross-platform dotfiles repo:
 
 | Code | Reason excluded |

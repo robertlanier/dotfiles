@@ -16,3 +16,13 @@ zsh/.config/zsh/sessions/
 *.local.*
 shell/.config/shell/local.sh
 git/.config/git/config.local
+
+# Credential and secret files — never commit these
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.token
+credentials.json
+secrets.*

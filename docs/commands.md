@@ -65,7 +65,7 @@ bat cache --clear && bat cache --build      # Rebuild syntax/theme cache
 ## ShellCheck (manual)
 
 ```bash
-shellcheck -x -S warning --exclude=SC1090,SC1091,SC2016,SC2148 <file>
+shellcheck --shell=bash -x -S warning --exclude=SC1090,SC1091,SC2016,SC2148 <file>
 ```
 
 ## shfmt (manual)

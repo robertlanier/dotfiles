@@ -17,7 +17,7 @@ exec $SHELL
 | *(none)* | Full install: deps + backup + deploy |
 | `--deps-only` | Install tools only, no config changes |
 | `--skip-backup` | Skip backup and restore prompt |
-| `--skip-deploy` | Install deps and backup, but skip stow |
+| `--skip-deploy` | Install dependencies only — no backup, no stow |
 | `--zsh` | Configure zsh as default shell (non-interactive) |
 | `--no-zsh` | Skip zsh shell configuration |
 | `-h, --help` | Show help |

@@ -7,7 +7,7 @@
 # ─── Adding a new update step ────────────────────────────────────────────────
 #   1. Write an update_<name>() function in the UPDATE STEPS section below.
 #   2. Add one run_step line to main():
-#        run_step "Display Name"  step-key  update_<name>
+#        run_step "Display Name"  update_<name>
 #   3. Add one --help entry for the new step key.
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -42,6 +42,7 @@ run_step() {
         return 0
     fi
     log_warning "'${label}' reported an error — continuing with remaining steps"
+    return 1
 }
 
 # ─── UPDATE STEPS ─────────────────────────────────────────────────────────────
@@ -309,16 +310,22 @@ main() {
         esac
     fi
 
-    # Run all steps in order
-    run_step "Git submodules" update_submodules
-    run_step "TPM plugins" update_tpm_plugins
-    run_step "Homebrew" update_homebrew
-    run_step "Bat cache" update_bat_cache
-    run_step "Nerd Font" update_nerd_font
-    run_step "Binary tools" update_binary_tools
+    # Run all steps in order — || true prevents set -e from aborting on a step failure;
+    # run_step already logs the warning and returns 1 to signal the failure.
+    local _failed=0
+    run_step "Git submodules" update_submodules  || _failed=1
+    run_step "TPM plugins" update_tpm_plugins    || _failed=1
+    run_step "Homebrew" update_homebrew          || _failed=1
+    run_step "Bat cache" update_bat_cache        || _failed=1
+    run_step "Nerd Font" update_nerd_font        || _failed=1
+    run_step "Binary tools" update_binary_tools  || _failed=1
 
     echo ""
-    log_success "All updates complete!"
+    if [ "$_failed" -eq 0 ]; then
+        log_success "All updates complete!"
+    else
+        log_warning "Some steps reported errors — see output above"
+    fi
     echo ""
     echo "Restart your shell and any tmux sessions to pick up changes."
     echo '  Shell:   exec $SHELL'

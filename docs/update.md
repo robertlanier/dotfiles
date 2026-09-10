@@ -30,7 +30,7 @@ The `binaries` step only acts on tools installed to `~/.local/bin/` — package-
 1. Write an `update_<name>()` function in `update.sh` under the `UPDATE STEPS` section.
 2. Add one `run_step` line to `main()`:
    ```bash
-   run_step "Display Name"  step-key  update_<name>
+   run_step "Display Name"  update_<name>
    ```
 3. Add one `--help` entry for the new step key.
 

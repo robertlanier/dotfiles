@@ -3,7 +3,8 @@
 # Dotfiles installation script
 # Automatically installs requirements, backs up existing configs, and deploys dotfiles
 
-set -e # Exit on any error
+set -e          # Exit on error
+set -o pipefail # Propagate curl failures in curl|sh pipelines
 
 # Colors for output
 RED='\033[0;31m'
@@ -802,9 +803,12 @@ install_ohmytmux() {
 
     # Install all TPM plugins declared in .tmux.conf.local
     log_info "Installing TPM plugins..."
-    TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins" \
-        "$tpm_dir/bin/install_plugins" \
-        && log_success "TPM plugins installed"
+    if TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins" \
+        "$tpm_dir/bin/install_plugins"; then
+        log_success "TPM plugins installed"
+    else
+        log_warning "TPM plugin install reported errors — run 'prefix + I' inside tmux to finish manually"
+    fi
 }
 
 # Install herdr (runtime for AI coding agents)

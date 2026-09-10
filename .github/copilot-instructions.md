@@ -110,15 +110,14 @@ Located in [bash/.bashrc](bash/.bashrc) and [zsh/.zshrc](zsh/.zshrc):
 
 ### Dual-Remote Git Workflow
 
-This repo pushes to **GitLab (origin)** and **GitHub (github)** with different commit emails:
+This repo mirrors to two remotes:
 
 ```bash
-./push-both.sh main             # Push to both remotes
-git push origin main            # GitLab only (robert.lanier@phreesia.com)
-git push github main            # GitHub only (lanier@posteo.com)
+git push origin main            # Primary remote (GitLab)
+git push github main            # Mirror (GitHub)
 ```
 
-**Implementation**: [push-both.sh](push-both.sh) temporarily sets `user.email` before each push, then restores default (GitLab email).
+To add the GitHub mirror: `git remote add github git@github.com:robertlanier/dotfiles.git`
 
 ## Project-Specific Conventions
 
@@ -230,8 +229,8 @@ Each function has OS-specific branches for macOS (brew), Ubuntu (apt), Fedora/RH
 
 ### Why Dual Remotes?
 
-**Context**: Work repos on GitLab (Phreesia email), personal repos on GitHub (personal email).
+**Context**: Primary development on GitLab; GitHub serves as a public mirror.
 
-**Solution**: [push-both.sh](push-both.sh) handles email switching and pushes to both.
+**Solution**: Two named remotes (`origin` for GitLab, `github` for GitHub). Push to each independently.
 
-**Benefit**: One command syncs both remotes with correct email attribution for commits.
+**Benefit**: GitLab remains the source of truth; GitHub provides public discoverability.
